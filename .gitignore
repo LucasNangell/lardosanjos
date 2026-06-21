@@ -56,3 +56,6 @@ backups/
 *.sw?
 .DS_Store
 Thumbs.db
+
+# Capturas locais do hPanel (não versionar)
+*.mhtml
