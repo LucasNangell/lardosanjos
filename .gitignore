@@ -41,6 +41,7 @@ backups/
 !deploy/schema.sql
 !public_html/schema.sql
 !deploy/sql/*.sql
+!packages/database/prisma/migrations/**/*.sql
 
 # Prisma gerado local (regenerado no build)
 .prisma/
