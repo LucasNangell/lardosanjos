@@ -14,6 +14,17 @@ Referência rápida de build/start para **Node.js Web Apps** no hPanel (monorepo
 
 ---
 
+### IMPORTANTE — Gerenciador de pacotes no hPanel
+
+Use **npm** (não **pnpm**) no campo **Gerenciador de pacotes**.
+
+O pnpm via Corepack da Hostinger falha com:
+`ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING`
+
+O comando de construção usa `npx pnpm@9` internamente para instalar dependências do monorepo.
+
+---
+
 ## API NestJS
 
 | Campo | Valor |
@@ -47,7 +58,9 @@ Requer variáveis `SEED_ADMIN_*` no hPanel. Remova a senha do painel após o see
 | Campo | Valor |
 |-------|--------|
 | Domínio sugerido | `lardosanjos.online` |
-| Build command | `pnpm run hostinger:build:web` |
+| Build command | `npm run hostinger:build:web` |
+| Gerenciador de pacotes | **npm** (obrigatório — não use pnpm no hPanel) |
+| Diretório de saída | `apps/web/.next` |
 | Start command | `pnpm run start:web` |
 
 **Antes do build**, configure no hPanel (ver `deploy/hostinger-env-web.example`):
