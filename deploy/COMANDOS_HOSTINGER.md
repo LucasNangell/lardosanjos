@@ -1,8 +1,8 @@
-# Comandos Hostinger — Lar dos Anjos Pet
+## Deploy alternativo (Git / Node Web App)
 
-Guia atualizado após auditoria de deploy (Corepack/pnpm na Hostinger).
+Se preferir deploy automático via Git, veja [COMANDOS_HOSTINGER.md](./COMANDOS_HOSTINGER.md).
 
-**Configuração campo a campo:** [HOSTINGER_HPANEL_EXATO.md](./HOSTINGER_HPANEL_EXATO.md)
+**Recomendado:** upload manual com `pnpm run build:public_html` — evita erros de build na Hostinger.
 
 ---
 

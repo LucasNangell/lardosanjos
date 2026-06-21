@@ -11,6 +11,13 @@ build/
 out/
 .turbo/
 
+# public_html — artefatos de upload (gerados localmente)
+public_html/lardosanjos.online/
+public_html/admin.lardosanjos.online/
+public_html/api.lardosanjos.online/
+!public_html/README*.md
+!public_html/schema.sql
+
 # Ambiente — nunca versionar secrets reais
 .env
 .env.*

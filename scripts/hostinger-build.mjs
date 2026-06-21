@@ -6,7 +6,7 @@
  */
 import { execSync } from 'node:child_process';
 
-const app = process.env.HOSTINGER_APP || process.argv[2] || 'web';
+const app = process.argv[2] || process.env.HOSTINGER_APP || 'web';
 
 if (!['web', 'admin', 'api'].includes(app)) {
   console.error(`HOSTINGER_APP inválido: ${app}. Use web, admin ou api.`);

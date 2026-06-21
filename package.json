@@ -33,7 +33,8 @@
     "start": "node scripts/hostinger-start.mjs",
     "hostinger:start:web": "HOSTINGER_APP=web node scripts/hostinger-start.mjs",
     "hostinger:start:admin": "HOSTINGER_APP=admin node scripts/hostinger-start.mjs",
-    "hostinger:start:api": "HOSTINGER_APP=api node scripts/hostinger-start.mjs"
+    "hostinger:start:api": "HOSTINGER_APP=api node scripts/hostinger-start.mjs",
+    "build:public_html": "node scripts/build-public-html.mjs"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
