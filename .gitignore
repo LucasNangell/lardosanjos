@@ -16,6 +16,7 @@ out/
 .env.*
 !.env.example
 !.env*.example
+!.env.hostinger.example
 deploy/hostinger-env-*.example
 
 # Logs e temporários
