@@ -1,0 +1,113 @@
+Você é um backend engineer sênior, especialista em integrações financeiras, Asaas, NestJS, segurança de secrets, DTOs, retries e tratamento robusto de falhas.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 5 — Integração Base com API do Asaas (Sandbox)**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar um serviço backend seguro para comunicação com a API do Asaas em sandbox, sem ainda expor checkout completo ao usuário.
+
+## Escopo obrigatório
+
+1. Criar módulo `integrations/asaas`.
+2. Criar `AsaasService`.
+3. Criar cliente HTTP configurado por `.env`:
+
+   * `ASAAS_API_URL`;
+   * `ASAAS_API_KEY`;
+   * `ASAAS_ENVIRONMENT=sandbox`;
+   * timeouts;
+   * retries moderados;
+   * logs sanitizados.
+4. Implementar métodos:
+
+   * criar cliente;
+   * atualizar cliente;
+   * buscar cliente;
+   * criar cobrança de cartão;
+   * criar cobrança de boleto;
+   * criar assinatura;
+   * buscar assinatura;
+   * cancelar assinatura;
+   * buscar pagamento.
+5. Criar DTOs internos.
+6. Criar tratamento de erros padronizado.
+7. Criar testes com mocks HTTP.
+8. Opcionalmente criar comando/script interno de teste sandbox, sem expor rota pública sensível.
+
+## Correção obrigatória
+
+Não criar método para Pix avulso único via Asaas.
+
+Não criar fallback automático que envie Pix único para Asaas.
+
+Pix único avulso pertence ao fluxo próprio BR Code/EMV, que será implementado em fase específica.
+
+## O que não implementar agora
+
+Não implementar checkout público, webhooks, assinaturas reais completas, telas, Pix BR Code, confirmação manual de Pix, portal de transparência ou área do doador.
+
+## Segurança obrigatória
+
+1. Nunca expor `ASAAS_API_KEY` no frontend.
+2. Não logar headers de autorização.
+3. Não logar dados completos de cartão.
+4. Sanitizar payloads nos logs.
+5. Todas as chamadas devem passar pelo backend.
+6. Variáveis reais devem estar apenas em `.env`, nunca em arquivos versionados.
+7. `.env.example` deve conter apenas placeholders.
+
+## Testes obrigatórios
+
+1. Teste de criação de cliente com mock.
+2. Teste de criação de cobrança cartão com mock.
+3. Teste de criação de boleto com mock.
+4. Teste de criação de assinatura com mock.
+5. Teste de erro 401 do Asaas.
+6. Teste de timeout.
+7. Teste de payload inválido.
+8. Se possível, teste manual em sandbox com dados fictícios.
+9. Garantir que nenhum fluxo de Pix avulso chama Asaas.
+
+## Critérios de aceite
+
+1. `AsaasService` centralizado.
+2. Variáveis de ambiente documentadas.
+3. Testes passam.
+4. Nenhuma chave exposta.
+5. Nenhum fluxo de Pix avulso usa Asaas.
+6. Código preparado para ser consumido pelas fases de cartão, boleto e assinaturas.
+
+## Entrega final esperada
+
+Ao final, documente:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Variáveis de ambiente necessárias.
+4. Como configurar sandbox do Asaas.
+5. Como testar manualmente.
+6. Testes executados.
+7. Pendências e riscos.

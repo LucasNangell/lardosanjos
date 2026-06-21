@@ -1,0 +1,126 @@
+Você é um full-stack engineer sênior, especialista em CMS leve, páginas públicas, upload de imagens, UX emocional saudável, performance web, Next.js, NestJS e MySQL.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 18 — Gestão de Animais e Histórias de Adoção**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar cadastro administrativo de animais, galeria de imagens e páginas públicas para apresentar animais acolhidos, em tratamento, disponíveis para adoção ou adotados.
+
+## Escopo obrigatório
+
+1. Criar páginas admin:
+
+   * `/admin/animais`;
+   * `/admin/animais/novo`;
+   * `/admin/animais/:id`.
+2. Criar páginas públicas:
+
+   * `/animais`;
+   * `/animais/:slug` ou `/animais/:id`.
+3. Criar endpoints:
+
+   * `GET /api/v1/public/animals`;
+   * `GET /api/v1/public/animals/:id`;
+   * CRUD admin de animais;
+   * upload de imagens;
+   * ordenação de galeria.
+4. Campos:
+
+   * nome;
+   * espécie;
+   * sexo;
+   * idade aproximada;
+   * porte;
+   * status;
+   * história;
+   * necessidades;
+   * foto principal;
+   * galeria;
+   * público/interno;
+   * observações internas.
+5. Filtros públicos:
+
+   * espécie;
+   * porte;
+   * status.
+6. CTAs:
+
+   * quero ajudar;
+   * tenho interesse em adoção;
+   * doar para animais como este.
+7. Formulário simples de interesse em adoção/contato, protegido contra spam.
+
+## Correções obrigatórias
+
+1. Não expor observações internas.
+2. Imagens devem ser otimizadas.
+3. Não usar fotos enormes sem tratamento.
+4. Não implementar campanhas emergenciais completas nesta fase.
+5. Não misturar cadastro de animal com fluxo financeiro.
+6. Usar MySQL via Prisma.
+
+## Segurança obrigatória
+
+1. Upload seguro.
+2. Proteção contra spam no formulário.
+3. RBAC para admin.
+4. Auditoria em alterações relevantes.
+5. Validar mime e tamanho de imagens.
+6. Não permitir upload de script disfarçado de imagem.
+
+## Testes obrigatórios
+
+1. Criar animal.
+2. Editar animal.
+3. Publicar/despublicar.
+4. Upload de múltiplas fotos.
+5. Página pública lista somente públicos.
+6. Filtros funcionam.
+7. Mobile não quebra.
+8. Dados internos ficam ocultos.
+9. Persistência no MySQL funciona.
+
+## Critérios de aceite
+
+1. Animal cadastrado aparece no site.
+2. Galeria funciona.
+3. Dados internos ficam protegidos.
+4. Build e testes passam.
+5. Páginas públicas são responsivas e atraentes.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como cadastrar um animal completo.
+4. Como validar no portal público.
+5. Como conferir no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---

@@ -1,0 +1,156 @@
+Você é um frontend/full-stack engineer sênior, especialista em Next.js, formulários, upload seguro, UX de checkout, Pix, experiência mobile, NestJS e storage seguro.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 7 — Página de Doação Única e Envio de Comprovante Pix**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar a experiência pública de doação única via Pix interno, exibindo QR Code, Pix Copia e Cola, botão “Já fiz o Pix” e upload seguro de comprovante.
+
+## Escopo obrigatório
+
+1. Criar página pública:
+
+   * `/doar-unica`;
+   * ou rota equivalente já definida no projeto.
+2. Implementar fluxo Pix:
+
+   * escolher valor rápido;
+   * informar valor personalizado, se permitido;
+   * preencher nome;
+   * preencher e-mail;
+   * preencher WhatsApp;
+   * marcar consentimento para mural;
+   * marcar anonimato;
+   * escrever mensagem opcional.
+3. Consumir:
+
+   * `GET /api/v1/public/pix/settings`;
+   * `POST /api/v1/public/donations/pix`.
+4. Exibir tela com:
+
+   * QR Code Pix;
+   * Pix Copia e Cola;
+   * valor;
+   * beneficiário;
+   * instruções;
+   * botão “Copiar código Pix”;
+   * botão “Já fiz o Pix”;
+   * aviso claro de que pagamento só será confirmado após validação administrativa.
+5. Implementar rota/fluxo:
+
+   * `POST /api/v1/public/donations/pix/:id/mark-as-paid`.
+6. Implementar upload de comprovante:
+
+   * `POST /api/v1/public/donations/pix/:id/upload-receipt`.
+7. Criar estados:
+
+   * carregando;
+   * erro;
+   * Pix gerado;
+   * comprovante enviado;
+   * aguardando confirmação manual;
+   * expirado;
+   * rejeitado;
+   * confirmado.
+8. Criar página/tela de obrigado para Pix pendente.
+
+## Correções obrigatórias
+
+1. Upload de comprovante deve usar rota backend controlada ou URL assinada segura.
+2. Comprovante não pode ficar público.
+3. Não usar URL pública permanente do storage.
+4. Não permitir upload de arquivo perigoso.
+5. Não tratar “Já fiz o Pix” como confirmação financeira.
+6. Não contabilizar a doação em transparência nesta fase.
+7. Não chamar Asaas no fluxo Pix.
+8. Não armazenar comprovante sem validar tipo e tamanho no backend.
+
+## O que não implementar agora
+
+Não implementar painel admin de confirmação, Asaas cartão/boleto, assinatura mensal, mural, transparência ou área do doador.
+
+## Segurança obrigatória
+
+1. Validar tipo de arquivo:
+
+   * PDF;
+   * JPEG;
+   * PNG.
+2. Limitar tamanho, por exemplo 5 MB.
+3. Validar arquivo no backend, não apenas no frontend.
+4. Não logar conteúdo do comprovante.
+5. Rate limit nos endpoints públicos.
+6. Mensagens claras contra comprovantes falsos.
+7. Não expor dados sensíveis do recebedor além do necessário.
+
+## UX obrigatória
+
+1. Layout mobile impecável.
+2. Botão copiar com feedback visual.
+3. Alertas simples e humanos.
+4. Explicar que a confirmação pode levar algum tempo.
+5. Permitir doação anônima.
+6. Não usar gatilhos agressivos ou culpabilizantes.
+7. Exibir confiança e transparência.
+8. Garantir que o usuário entenda que QR Code gerado não significa pagamento confirmado.
+
+## Testes obrigatórios
+
+1. Gerar Pix com valor rápido.
+2. Gerar Pix com valor personalizado.
+3. Bloquear valor abaixo do mínimo.
+4. Copiar Pix Copia e Cola.
+5. Marcar “Já fiz o Pix”.
+6. Enviar comprovante válido.
+7. Bloquear arquivo inválido.
+8. Bloquear arquivo grande.
+9. Validar responsividade mobile.
+10. Garantir que Asaas não é chamado.
+11. Garantir que o status no MySQL transita corretamente.
+
+## Critérios de aceite
+
+1. Usuário consegue gerar Pix único sem Asaas.
+2. QR Code aparece corretamente.
+3. Pix Copia e Cola copia corretamente.
+4. Usuário consegue enviar comprovante.
+5. Doação fica pendente.
+6. Nenhuma doação pendente entra como confirmada.
+7. Build e testes passam.
+
+## Entrega final esperada
+
+Ao final, informe:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Fluxo implementado.
+4. Como testar o fluxo manualmente do início ao fim.
+5. Como conferir status no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---

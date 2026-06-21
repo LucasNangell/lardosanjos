@@ -1,0 +1,116 @@
+Você é um full-stack engineer sênior, especialista em checkout seguro, Asaas, cartões, boletos, LGPD e tratamento de falhas financeiras.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 8 — Checkout de Cartão e Boleto Avulsos (Com Asaas)**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Implementar no checkout de doação única as opções cartão de crédito e boleto via Asaas, mantendo Pix avulso totalmente separado e interno.
+
+## Escopo obrigatório
+
+1. Criar endpoint:
+
+   * `POST /api/v1/public/donations/onetime`.
+2. Permitir apenas formas:
+
+   * `CREDIT_CARD`;
+   * `BOLETO`.
+3. Criar ou atualizar cliente no Asaas.
+4. Criar cobrança avulsa no Asaas.
+5. Persistir em `payments` no MySQL com status inicial adequado.
+6. Criar UI em `/doar-unica` para cartão e boleto.
+7. Exibir retorno:
+
+   * cartão aprovado/pendente/recusado;
+   * boleto gerado com link/linha digitável, se disponível.
+8. Criar estados:
+
+   * processando;
+   * aprovado;
+   * pendente;
+   * recusado;
+   * erro de gateway;
+   * erro de validação.
+9. Nunca misturar esse fluxo com Pix interno.
+
+## Correções obrigatórias
+
+1. Não armazenar dados de cartão no banco.
+2. Não registrar dados de cartão em logs.
+3. Se Asaas oferecer mecanismo mais seguro de tokenização ou checkout, preferir essa abordagem.
+4. Status final de pagamento deve depender de webhook ou consulta segura posterior, não apenas da tela de retorno.
+5. Não criar Pix avulso via Asaas.
+6. Não alterar o fluxo Pix já criado na fase anterior, exceto para integrar visualmente as abas de pagamento.
+
+## O que não implementar agora
+
+Não implementar assinaturas mensais, webhooks completos, dashboard do doador, transparência ou admin financeiro.
+
+## Segurança obrigatória
+
+1. HTTPS obrigatório em produção.
+2. Sanitização de logs.
+3. Validação forte com Zod/DTO.
+4. Não expor `ASAAS_API_KEY`.
+5. Tratar cartão recusado sem vazar detalhes indevidos.
+6. Não salvar CVV.
+7. Não salvar número completo do cartão.
+8. Não misturar dados financeiros sensíveis com logs de debug.
+
+## Testes obrigatórios
+
+1. Criar doação única com cartão aprovado em sandbox/mock.
+2. Simular cartão recusado.
+3. Criar boleto.
+4. Validar valor mínimo.
+5. Validar campos obrigatórios.
+6. Garantir que Pix não chama Asaas.
+7. Garantir que pagamento pendente não entra como confirmado.
+8. Testar falha de rede do Asaas.
+9. Validar gravação em `payments` no MySQL.
+10. Validar que `pix_donations` não é usado para cartão/boleto.
+
+## Critérios de aceite
+
+1. Cartão/boleto via Asaas funcionam em sandbox.
+2. Pix único continua interno.
+3. `payments` recebe apenas pagamentos Asaas.
+4. Dados sensíveis de cartão não são persistidos nem logados.
+5. Build e testes passam.
+
+## Entrega final esperada
+
+Ao final, documente:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar cartão no sandbox.
+4. Como validar boleto no sandbox.
+5. Como conferir registros no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---

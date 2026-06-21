@@ -1,0 +1,150 @@
+Você é um full-stack engineer sênior, especialista em painéis financeiros, conciliação manual, auditoria, RBAC, LGPD, MySQL e segurança de comprovantes.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 15 — Admin: Confirmação de Doações Pix (Painel de Auditoria)**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar o painel administrativo para confirmar, rejeitar, marcar como duplicada e auditar doações Pix avulsas feitas sem Asaas.
+
+## Escopo obrigatório
+
+1. Criar página admin:
+
+   * `/admin/financeiro/pix-confirm`;
+   * ou equivalente.
+2. Criar endpoints:
+
+   * `GET /api/v1/admin/pix/donations`;
+   * `GET /api/v1/admin/pix/donations/:id`;
+   * `POST /api/v1/admin/pix/donations/:id/confirm`;
+   * `POST /api/v1/admin/pix/donations/:id/reject`;
+   * `POST /api/v1/admin/pix/donations/:id/mark-duplicate`;
+   * `POST /api/v1/admin/pix/donations/:id/request-info`.
+3. Criar tabela com:
+
+   * data;
+   * nome;
+   * e-mail;
+   * WhatsApp;
+   * valor;
+   * status;
+   * comprovante;
+   * mensagem;
+   * data em que marcou “Já fiz o Pix”;
+   * admin responsável;
+   * ações.
+4. Criar filtros:
+
+   * status;
+   * período;
+   * valor;
+   * com comprovante;
+   * sem comprovante;
+   * nome/e-mail/telefone.
+5. Criar visualizador seguro de comprovante.
+6. Confirmar pagamento:
+
+   * mudar para `CONFIRMADO_MANUALMENTE`;
+   * registrar admin;
+   * registrar data;
+   * registrar histórico em `pix_payment_confirmations`;
+   * atualizar totais financeiros confirmados;
+   * liberar para transparência;
+   * liberar para mural, se consentido.
+7. Rejeitar pagamento:
+
+   * exigir motivo;
+   * registrar auditoria;
+   * não contabilizar.
+8. Marcar duplicado:
+
+   * registrar auditoria;
+   * não contabilizar.
+9. Solicitar informações:
+
+   * preparar envio de e-mail, se serviço já existir;
+   * caso contrário, registrar pendência clara.
+
+## Correções obrigatórias
+
+1. Apenas `PIX_CONFIRM_MANUAL` pode confirmar.
+2. Comprovantes não podem ser públicos.
+3. Pix pendente não entra na transparência.
+4. Rejeitado não entra no mural.
+5. Não sobrescrever status confirmado sem auditoria.
+6. Toda transição deve ser auditada.
+7. Não chamar Asaas.
+8. Usar transações no MySQL/Prisma quando a ação alterar múltiplas tabelas.
+
+## O que não implementar agora
+
+Não implementar integração automática com extrato bancário, Open Finance, OFX ou CNAB.
+
+## Segurança obrigatória
+
+1. RBAC rigoroso.
+2. URL assinada temporária para comprovante.
+3. Auditoria de confirmação/rejeição.
+4. Proteção contra confirmação duplicada.
+5. Transações no banco para evitar inconsistência.
+6. Não expor comprovantes a usuários públicos.
+7. Não permitir confirmação de Pix já rejeitado/duplicado sem fluxo explícito de revisão.
+
+## Testes obrigatórios
+
+1. Listar Pix pendentes.
+2. Confirmar Pix.
+3. Rejeitar Pix.
+4. Marcar duplicado.
+5. Usuário sem permissão não confirma.
+6. Confirmado aparece como receita confirmada.
+7. Pendente não aparece como receita confirmada.
+8. Rejeitado não aparece no mural.
+9. Comprovante só é acessível por admin autorizado.
+10. Alterações são gravadas em `pix_payment_confirmations`.
+11. Dados são persistidos corretamente no MySQL.
+
+## Critérios de aceite
+
+1. Admin confirma/rejeita Pix corretamente.
+2. Transparência só recebe Pix confirmado.
+3. Auditoria registra tudo.
+4. Build e testes passam.
+5. Não há dependência do Asaas no Pix manual.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar manualmente com um Pix pendente de teste.
+4. Como conferir status e auditoria no MySQL.
+5. Testes executados.
+6. Pendências e riscos.
+
+---
+

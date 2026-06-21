@@ -1,0 +1,138 @@
+Você é um full-stack engineer sênior, especialista em dashboards públicos, transparência financeira, agregações SQL em MySQL, gráficos, UX responsiva e confiabilidade de dados.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 16 — Portal de Transparência Público e Prestação de Contas**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar o portal público de transparência com arrecadação confirmada, despesas públicas, gráficos, custo diário, meta mensal e relatórios, usando consultas e agregações compatíveis com **MySQL**.
+
+## Escopo obrigatório
+
+1. Criar página pública:
+
+   * `/transparencia`.
+2. Criar endpoint:
+
+   * `GET /api/v1/public/transparency`.
+3. Exibir:
+
+   * arrecadado no mês;
+   * meta mensal;
+   * custo diário estimado;
+   * total de doadores ativos;
+   * despesas do mês;
+   * saldo estimado;
+   * entradas confirmadas;
+   * saídas públicas;
+   * gráficos por categoria;
+   * evolução mensal;
+   * barra de meta.
+4. Considerar como receita confirmada apenas:
+
+   * pagamentos Asaas `RECEIVED` ou `CONFIRMED`;
+   * Pix manual `CONFIRMADO_MANUALMENTE`;
+   * receitas manuais confirmadas, se já existirem.
+5. Não contabilizar:
+
+   * Pix gerado;
+   * Pix com comprovante em análise;
+   * Pix rejeitado;
+   * cobrança Asaas pendente;
+   * boleto vencido;
+   * cartão recusado;
+   * duplicados.
+6. Criar lista de despesas públicas.
+7. Criar estados:
+
+   * carregando;
+   * sem dados;
+   * erro;
+   * parcial.
+8. Criar gráficos responsivos.
+
+## Correções obrigatórias desta fase
+
+1. Usar consultas compatíveis com MySQL.
+2. Não usar funções exclusivas de PostgreSQL.
+3. Não usar `JSONB`, operadores `->>` de PostgreSQL ou sintaxe específica de PostgreSQL.
+4. Caso use Prisma, preferir agregações via Prisma quando possível.
+5. Quando for necessário SQL bruto, usar sintaxe MySQL.
+6. Garantir que filtros por mês/ano e datas funcionem corretamente em MySQL.
+7. Garantir que valores `Decimal` sejam tratados corretamente no JavaScript/TypeScript, sem perda de precisão.
+
+## Correção operacional
+
+Como a Fase 17 ainda criará o admin completo de despesas, esta fase deve criar a visualização pública e endpoints de leitura. Se ainda não houver despesas cadastradas por UI, prever estado vazio e compatibilidade com dados inseridos por seed ou banco.
+
+## O que não implementar agora
+
+Não implementar CRUD completo de despesas, upload de comprovantes administrativos ou fechamento mensal administrativo completo.
+
+## Segurança obrigatória
+
+1. Não expor dados privados.
+2. Não exibir comprovantes marcados como internos.
+3. Não expor dados pessoais de doadores.
+4. Garantir que apenas valores confirmados entrem nos totais.
+5. Não expor e-mail, telefone, CPF ou endereço de doadores.
+6. Não exibir comprovantes privados.
+
+## Testes obrigatórios
+
+1. Pix pendente não soma.
+2. Pix confirmado soma.
+3. Asaas pendente não soma.
+4. Asaas recebido soma.
+5. Despesa privada não aparece.
+6. Despesa pública aparece.
+7. Gráficos funcionam sem dados.
+8. Responsividade mobile.
+9. Consultas funcionam no MySQL local.
+10. Valores `Decimal` não sofrem arredondamento indevido.
+11. Totais batem com consultas manuais no MySQL.
+
+## Critérios de aceite
+
+1. Portal mostra dados financeiros confiáveis.
+2. Totais batem com o MySQL local.
+3. Dados pendentes não entram.
+4. Nenhuma query depende de PostgreSQL.
+5. Build e testes passam.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar os números manualmente no MySQL local.
+4. Quais status entram nos totais.
+5. Quais status ficam fora.
+6. Testes executados.
+7. Pendências e riscos.
+
+---
+

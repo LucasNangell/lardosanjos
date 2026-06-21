@@ -1,0 +1,120 @@
+Você é um full-stack engineer sênior, especialista em assinaturas recorrentes, Asaas, UX de checkout, NestJS, Next.js, MySQL e segurança financeira.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 9 — Checkout de Doação Mensal (Assinaturas Asaas)**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Implementar o checkout de doação mensal recorrente, criando assinatura no Asaas e registro local em `subscriptions`.
+
+## Escopo obrigatório
+
+1. Criar página pública:
+
+   * `/seja-um-anjo`;
+   * checkout de assinatura em etapas.
+2. Listar planos ativos de `donation_plans`.
+3. Permitir valor personalizado, se previsto.
+4. Coletar dados do doador:
+
+   * nome;
+   * e-mail;
+   * WhatsApp;
+   * CPF/CNPJ, se necessário;
+   * endereço, se necessário;
+   * consentimentos LGPD;
+   * preferência de mural;
+   * anonimato.
+5. Criar endpoint:
+
+   * `POST /api/v1/public/donations/subscription`.
+6. Criar ou atualizar donor local no MySQL.
+7. Criar ou atualizar customer no Asaas.
+8. Criar assinatura mensal no Asaas.
+9. Persistir em:
+
+   * `donors`;
+   * `subscriptions`;
+   * possivelmente `payments` inicial, se a API retornar cobrança inicial.
+10. Exibir tela de confirmação com status pendente até webhook confirmar.
+11. Criar estados de falha e tentativa novamente.
+
+## Correções obrigatórias
+
+1. Não tratar assinatura criada como pagamento confirmado.
+2. A ativação plena deve depender de webhook ou consulta segura.
+3. Não usar Pix avulso manual para assinatura.
+4. Se Pix recorrente/Pix Automático estiver indisponível, tratar como recurso opcional/futuro.
+5. Não armazenar cartão no banco local.
+6. Não alterar o fluxo de Pix avulso único.
+7. Não criar assinatura sem consentimento obrigatório aceito.
+
+## O que não implementar agora
+
+Não implementar área do doador completa, upgrade, cancelamento, webhooks, carteirinha, transparência ou mural.
+
+## Segurança obrigatória
+
+1. Não expor Asaas no frontend.
+2. Não logar cartão.
+3. Validar todos os dados no backend.
+4. Registrar consentimentos importantes.
+5. Política de privacidade deve ser referenciada no checkout.
+6. Não salvar CVV, número completo do cartão ou dados sensíveis desnecessários.
+
+## Testes obrigatórios
+
+1. Criar assinatura com plano fixo.
+2. Criar assinatura com valor personalizado, se habilitado.
+3. Simular cartão recusado.
+4. Simular falha Asaas.
+5. Validar consentimentos obrigatórios.
+6. Garantir que assinatura pendente não aparece como ativa.
+7. Garantir que Pix avulso não é usado.
+8. Validar gravação em `donors` e `subscriptions` no MySQL.
+9. Validar que `asaas_subscription_id` é armazenado corretamente.
+
+## Critérios de aceite
+
+1. Usuário consegue iniciar assinatura mensal.
+2. Asaas retorna ID de assinatura em sandbox.
+3. Banco local armazena `asaas_subscription_id`.
+4. Status inicial é coerente.
+5. Build e testes passam.
+6. Nenhum pagamento pendente é tratado como confirmado.
+
+## Entrega final esperada
+
+Ao final, documente:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como testar assinatura em sandbox.
+4. Como conferir assinatura no MySQL.
+5. Testes executados.
+6. Pendências e riscos.
+
+---
+

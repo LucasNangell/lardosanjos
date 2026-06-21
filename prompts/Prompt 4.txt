@@ -1,0 +1,174 @@
+Você é um designer UI/UX sênior e frontend engineer, especialista em Next.js, Tailwind CSS, Radix UI, shadcn/ui, acessibilidade, responsividade e design systems.
+
+Antes de implementar, leia integralmente o arquivo PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md e execute somente a Fase 4 — Design System Base e Utilitários de UI.
+
+Regras obrigatórias para esta execução
+Não implemente funcionalidades de fases futuras.
+Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+Não quebre funcionalidades já implementadas em fases anteriores.
+Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+Não trate pagamento pendente como pagamento confirmado.
+Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+Sempre atualize ou crie testes compatíveis com a fase.
+Ao final, informe:
+arquivos criados;
+arquivos alterados;
+comandos executados;
+testes realizados;
+pendências;
+como validar manualmente;
+riscos ou decisões técnicas tomadas.
+Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+Objetivo da fase
+
+Criar o design system base, componentes reutilizáveis e identidade visual inicial do Lar dos Anjos Pet para portal público, área do doador e painel administrativo.
+
+Escopo obrigatório
+Configurar Tailwind CSS de forma compartilhável.
+Criar tokens de cor baseados na logo:
+verde principal;
+verde claro;
+verde secundário;
+caramelo/dourado;
+bege claro;
+marrom escuro;
+cinza de texto;
+fundo off-white.
+Configurar tipografia:
+Poppins para títulos;
+Inter para corpo;
+fallback seguro para carregamento.
+Instalar/configurar shadcn/ui ou Radix UI, conforme a estrutura mais coerente com o projeto.
+Criar pacote packages/ui com componentes:
+Button;
+Input;
+Textarea;
+Checkbox;
+RadioGroup;
+Select;
+Card;
+Dialog;
+Sheet;
+Tabs;
+Table;
+Badge;
+Alert;
+Skeleton;
+Progress;
+DropdownMenu;
+Tooltip;
+FormField.
+Criar componentes específicos:
+PublicHeader;
+PublicFooter;
+AdminShell;
+DonorShell;
+DonationPlanCard;
+StatCard;
+EmptyState;
+LoadingState;
+ErrorState.
+Criar playground visual ou página temporária demonstrando os componentes.
+Garantir responsividade mobile-first.
+Garantir acessibilidade mínima WCAG AA.
+Garantir compatibilidade visual entre apps/web e apps/admin.
+Diretrizes visuais obrigatórias
+
+Use como base a identidade do Lar dos Anjos Pet definida no plano.
+
+A interface deve transmitir:
+
+acolhimento;
+confiança;
+transparência;
+profissionalismo;
+leveza;
+cuidado animal;
+segurança para doações.
+Paleta recomendada
+
+Use ou adapte os tokens abaixo conforme o plano:
+
+Verde principal: #2AA98C;
+Verde claro: #D1EDE5;
+Verde secundário: #7BBAA9;
+Caramelo/dourado: #B9895D;
+Bege claro: #DEB88F;
+Marrom escuro: #6A4F36;
+Texto geral: #263238;
+Fundo geral: #F7FBF9.
+Correções obrigatórias
+Não acoplar componentes UI a regras de negócio.
+Componentes devem ser reutilizáveis em apps/web e apps/admin.
+Não criar páginas finais nesta fase.
+O design system deve considerar futura adaptação para app mobile.
+Não implementar fluxo financeiro, Pix, Asaas, dashboard, portal de transparência ou área real do doador.
+Não criar dependências desnecessárias com banco de dados nesta fase.
+O que não implementar agora
+
+Não implementar fluxos reais de doação, APIs, dashboards, dados dinâmicos, pagamentos, Pix, Asaas, portal de transparência, animais, campanhas, login avançado ou área do doador completa.
+
+Requisitos de acessibilidade
+Todos os inputs devem ter label acessível.
+Botões devem ter foco visível.
+Contraste deve ser adequado.
+Modais devem prender foco corretamente.
+Menus devem funcionar com teclado.
+Componentes interativos devem ter estados:
+normal;
+hover;
+focus;
+disabled;
+loading;
+erro, quando aplicável.
+Não depender apenas de cor para indicar estado.
+Componentes devem funcionar em mobile.
+Requisitos de responsividade
+
+Validar layouts em:
+
+320px;
+375px;
+768px;
+1024px;
+1440px;
+1920px.
+Testes obrigatórios
+Build dos apps.
+Lint.
+Typecheck.
+Verificação visual em mobile, tablet e desktop.
+Testes básicos de acessibilidade:
+labels;
+navegação por teclado;
+foco visível;
+contraste.
+Garantir que modais, selects e menus funcionem com teclado.
+Garantir que componentes importados de packages/ui funcionem em apps/web e apps/admin.
+Critérios de aceite
+
+A fase só estará concluída se:
+
+Componentes base estiverem prontos e reutilizáveis.
+apps/web e apps/admin conseguirem importar componentes do pacote UI.
+Layouts não quebrarem em 320px.
+Paleta da marca estiver aplicada corretamente.
+Design visual estiver coerente com abrigo de animais, doações e transparência.
+Componentes não estiverem acoplados a regras financeiras ou de negócio.
+Build, lint e typecheck passarem.
+Nenhuma funcionalidade futura tiver sido implementada indevidamente.
+Entrega final esperada
+
+Ao final da execução, entregue um relatório objetivo contendo:
+
+Arquivos criados.
+Arquivos alterados.
+Componentes criados.
+Comandos executados.
+Testes realizados.
+Como visualizar o playground ou página temporária.
+Como validar responsividade.
+Como validar acessibilidade básica.
+Pendências ou riscos identificados.

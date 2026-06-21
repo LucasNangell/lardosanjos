@@ -1,0 +1,134 @@
+Você é um full-stack engineer sênior, especialista em sistemas financeiros, prestação de contas, upload seguro, relatórios, RBAC, auditoria, MySQL e LGPD.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 17 — Painel Admin: Gestão de Despesas e Lançamentos**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar o painel financeiro administrativo para lançamento de despesas, categorias, comprovantes, relatórios mensais e conciliação básica.
+
+## Escopo obrigatório
+
+1. Criar páginas admin:
+
+   * `/admin/financeiro`;
+   * `/admin/financeiro/despesas`;
+   * `/admin/financeiro/despesas/nova`;
+   * `/admin/financeiro/categorias`;
+   * `/admin/financeiro/relatorios`;
+   * `/admin/financeiro/conciliacao-asaas`.
+2. Criar endpoints:
+
+   * CRUD de despesas;
+   * CRUD de categorias;
+   * upload de comprovantes;
+   * geração/listagem de relatórios mensais;
+   * leitura de dados consolidados;
+   * conciliação básica Asaas.
+3. Campos de despesa:
+
+   * título;
+   * categoria;
+   * valor;
+   * data;
+   * fornecedor;
+   * descrição interna;
+   * descrição pública;
+   * comprovante;
+   * público/interno;
+   * vincular animal, se já existir;
+   * vincular campanha, se já existir.
+4. Upload seguro no Cloudflare R2 ou storage configurado.
+5. Relatórios mensais:
+
+   * mês;
+   * ano;
+   * resumo;
+   * total arrecadado;
+   * total gasto;
+   * saldo;
+   * publicar/despublicar.
+6. Exportar relatório em PDF, se viável nesta fase.
+7. Atualizar portal de transparência quando despesa pública for criada.
+
+## Correções obrigatórias
+
+1. Comprovante privado não pode aparecer publicamente.
+2. Alteração de despesa publicada deve ser auditada.
+3. Apenas `FINANCE_WRITE` pode criar/editar despesas.
+4. Apenas valores confirmados entram como receita.
+5. Não criar dados fictícios como reais.
+6. Usar MySQL via Prisma.
+7. Não usar funções exclusivas de PostgreSQL.
+8. Conciliação Asaas não se aplica ao Pix manual.
+
+## O que não implementar agora
+
+Não implementar animais, campanhas completas, mural ou app mobile.
+
+## Segurança obrigatória
+
+1. RBAC.
+2. Auditoria.
+3. Upload com validação de mime/tamanho.
+4. URLs assinadas para comprovantes sensíveis.
+5. Evitar exclusão física sem auditoria.
+6. Não expor documentos fiscais privados.
+7. Garantir que alterações financeiras críticas registrem `old_data` e `new_data`.
+
+## Testes obrigatórios
+
+1. Criar despesa pública.
+2. Criar despesa privada.
+3. Upload de comprovante válido.
+4. Bloquear arquivo inválido.
+5. Usuário sem permissão não cria despesa.
+6. Portal exibe pública e oculta privada.
+7. Relatório mensal consolida corretamente.
+8. Conciliação Asaas não afeta Pix manual.
+9. Dados financeiros são gravados no MySQL.
+10. Valores `Decimal` mantêm precisão.
+
+## Critérios de aceite
+
+1. Admin consegue lançar despesas.
+2. Transparência reflete dados públicos.
+3. Relatório mensal funciona.
+4. Auditoria registra ações.
+5. Build e testes passam.
+6. Nenhum dado interno é exposto publicamente.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como fechar um relatório mensal de teste.
+4. Como conferir despesas no MySQL.
+5. Testes executados.
+6. Pendências e riscos.
+
+---

@@ -1,0 +1,124 @@
+Você é um security engineer e QA automation engineer sênior, especialista em NestJS, Next.js, MySQL, LGPD, Playwright, testes E2E, 2FA, rate limit e hardening de produção.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 21 — Segurança, Auditoria e Homologação E2E**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Reforçar segurança, auditoria, 2FA administrativo financeiro e testes E2E completos antes da produção.
+
+## Escopo obrigatório
+
+1. Implementar rate limit robusto em:
+
+   * login;
+   * geração de Pix;
+   * upload de comprovantes;
+   * recuperação de senha;
+   * webhook, com cautela para não bloquear Asaas indevidamente.
+2. Implementar 2FA/MFA para administradores financeiros:
+
+   * preferencialmente TOTP;
+   * ou e-mail OTP, se mais simples.
+3. Exigir 2FA para:
+
+   * confirmação de Pix;
+   * alteração de chave Pix;
+   * criação/edição de despesas;
+   * gestão de usuários admin.
+4. Revisar `audit_logs`.
+5. Criar testes Playwright E2E:
+
+   * doação Pix;
+   * upload comprovante;
+   * confirmação admin;
+   * doação cartão/boleto Asaas em sandbox/mock;
+   * assinatura mensal;
+   * cancelamento;
+   * transparência;
+   * mural com consentimento;
+   * acesso indevido bloqueado.
+6. Criar testes de segurança:
+
+   * IDOR;
+   * usuário sem permissão;
+   * arquivo inválido;
+   * tentativa de brute force;
+   * XSS básico em campos públicos;
+   * cache indevido PWA.
+7. Criar checklist de homologação.
+
+## Correções obrigatórias
+
+1. Não quebrar fluxos já funcionais.
+2. Não adicionar 2FA de forma que tranque o admin sem fallback.
+3. Não cachear dados sensíveis.
+4. Não bloquear webhooks reais indevidamente.
+5. Não gerar falsos positivos financeiros.
+6. Não alterar regra de confirmação manual do Pix.
+7. Não substituir MySQL por outro banco.
+8. Não expor secrets em logs de teste.
+
+## O que não implementar agora
+
+Não implementar novas features, app nativo ou deploy definitivo.
+
+## Testes obrigatórios
+
+1. Suite unitária.
+2. Suite integração.
+3. Suite E2E.
+4. Testes manuais documentados.
+5. Testes mobile.
+6. Testes de permissões.
+7. Testes de LGPD.
+8. Testes de webhooks duplicados.
+9. Testes de Pix pendente/confirmado/rejeitado.
+10. Testes de backup não são obrigatórios nesta fase, pois ficam para deploy.
+11. Testes de queries no MySQL.
+
+## Critérios de aceite
+
+1. Testes críticos passam.
+2. 2FA funciona.
+3. Auditoria cobre ações sensíveis.
+4. Não há exposição evidente de dados sensíveis.
+5. Checklist de homologação gerado.
+6. Build, lint e typecheck passam.
+
+## Entrega final esperada
+
+Ao final, entregue:
+
+1. Relatório de segurança.
+2. Arquivos criados.
+3. Arquivos alterados.
+4. Testes executados.
+5. Resultado dos testes.
+6. Pendências antes de produção.
+7. Como repetir a homologação.
+8. Riscos residuais.
+
+---

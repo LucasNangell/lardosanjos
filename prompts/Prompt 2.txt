@@ -1,0 +1,241 @@
+Você é um arquiteto de banco de dados e backend sênior, especialista em MySQL, Prisma ORM, modelagem relacional, segurança, LGPD e sistemas financeiros.
+
+Antes de implementar, leia integralmente o arquivo PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md e execute somente a Fase 2 — Modelagem de Dados, Prisma & Migrations Iniciais.
+
+Regras obrigatórias para esta execução
+Não implemente funcionalidades de fases futuras.
+Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+Não quebre funcionalidades já implementadas em fases anteriores.
+Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+Não trate pagamento pendente como pagamento confirmado.
+Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+Sempre atualize ou crie testes compatíveis com a fase.
+Ao final, informe:
+arquivos criados;
+arquivos alterados;
+comandos executados;
+testes realizados;
+pendências;
+como validar manualmente;
+riscos ou decisões técnicas tomadas.
+Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+Objetivo da fase
+
+Criar a modelagem de dados completa usando Prisma ORM com provider MySQL, migrations iniciais, seed base, permissões, planos, categorias, selos e estrutura específica de Pix avulso próprio.
+
+Escopo obrigatório
+Configurar Prisma em packages/database.
+Criar schema.prisma.
+Configurar obrigatoriamente:
+provider = "mysql";
+url = env("DATABASE_URL").
+Usar DATABASE_URL="mysql://root:CreativeStudio%402026@localhost:3306/lardosanjos" no ambiente local.
+Criar cliente Prisma compartilhado.
+Criar módulo de banco consumível por apps/api.
+Modelar as tabelas principais:
+users;
+roles;
+permissions;
+role_permissions;
+user_roles;
+donors;
+donation_plans;
+subscriptions;
+payments;
+pix_settings;
+pix_donations;
+pix_payment_confirmations;
+asaas_webhook_events;
+expenses;
+expense_categories;
+transparency_reports;
+animals;
+animal_images;
+campaigns;
+campaign_donations;
+badges;
+donor_badges;
+donor_cards;
+public_mural_entries;
+content_pages;
+faq_items;
+audit_logs;
+system_settings;
+uploaded_files.
+Criar enums necessários para status financeiros, Pix, usuários, assinaturas, pagamentos, animais, campanhas e permissões.
+Quando o suporte/compatibilidade do Prisma + MySQL indicar melhor prática, modelar enums como enum do Prisma ou como String com validação na aplicação, justificando a escolha.
+Usar tipos compatíveis com MySQL:
+IDs como String @id @default(uuid()) @db.VarChar(36);
+valores monetários como Decimal @db.Decimal(10, 2);
+textos longos como String @db.LongText quando necessário;
+QR Code Base64 como LongText;
+JSON estruturado como Json;
+datas como DateTime;
+campos curtos com @db.VarChar.
+Criar índices úteis:
+e-mail;
+CPF/CNPJ;
+IDs externos Asaas;
+txid Pix;
+status de pagamentos;
+status de Pix;
+datas de criação;
+slugs públicos.
+Criar constraints para evitar inconsistências.
+Criar migration inicial.
+Criar seed inicial.
+Criar instruções claras de como rodar:
+migration;
+seed;
+reset do banco local;
+geração do Prisma Client.
+Correções obrigatórias desta fase
+Não usar PostgreSQL.
+Não usar provider = "postgresql".
+Não usar JSONB; no MySQL usar Json.
+Não usar tipos específicos de PostgreSQL.
+Garantir charset/collation compatível com utf8mb4.
+Garantir que migrations rodem no MySQL 8.0 local.
+Garantir que a senha com @ esteja corretamente escapada como %40 na DATABASE_URL.
+Correção obrigatória do seed
+
+O seed do administrador master não pode usar senha fixa no código.
+
+Use variáveis de ambiente:
+
+SEED_ADMIN_NAME;
+SEED_ADMIN_EMAIL;
+SEED_ADMIN_PASSWORD.
+
+Se essas variáveis não existirem, a seed deve falhar com mensagem clara, ou criar apenas dados não sensíveis.
+
+Seed obrigatório
+
+Criar seed para:
+
+Papéis administrativos:
+SUPER_ADMIN;
+FINANCEIRO;
+CONTEUDO;
+VOLUNTARIO;
+TRANSPARENCIA.
+Permissões:
+PIX_SETTINGS_READ;
+PIX_SETTINGS_WRITE;
+PIX_CONFIRM_MANUAL;
+FINANCE_READ;
+FINANCE_WRITE;
+DONOR_READ;
+DONOR_WRITE;
+ANIMAL_READ;
+ANIMAL_WRITE;
+CAMPAIGN_READ;
+CAMPAIGN_WRITE;
+TRANSPARENCY_READ;
+TRANSPARENCY_WRITE;
+ADMIN_USERS_MANAGE;
+AUDIT_READ.
+Categorias de despesa:
+Ração;
+Veterinário;
+Medicamentos;
+Castração;
+Transporte;
+Limpeza;
+Estrutura;
+Emergências;
+Outros.
+Planos iniciais:
+Anjo Semente — R$ 9,90;
+Anjo Ração — R$ 19,90;
+Anjo Cuidado — R$ 39,90;
+Anjo Saúde — R$ 79,90;
+Anjo Guardião — R$ 149,90;
+Anjo Protetor Master — R$ 299,90.
+Selos iniciais:
+Primeiro Passo;
+Anjo Mensal;
+Anjo Fiel;
+Anjo Guardião;
+Anjo Protetor;
+Anjo Silencioso.
+Decisão obrigatória sobre Pix
+
+Mantenha Pix avulso próprio separado de payments.
+
+Use tabelas específicas:
+
+pix_settings;
+pix_donations;
+pix_payment_confirmations.
+
+A tabela payments deve representar pagamentos processados por Asaas, e não Pix avulso interno.
+
+Regras importantes de modelagem financeira
+Não usar Float para valores monetários.
+Usar Decimal @db.Decimal(10, 2) para todos os valores financeiros.
+Status financeiros devem permitir diferenciar claramente:
+pendente;
+confirmado;
+recebido;
+vencido;
+recusado;
+cancelado;
+estornado;
+duplicado.
+Pix manual confirmado deve ser tratado separadamente de pagamento Asaas confirmado.
+O modelo deve permitir relatórios financeiros confiáveis sem misturar valores pendentes com valores confirmados.
+Regras importantes de LGPD e privacidade
+Dados pessoais de doadores devem ficar em tabelas protegidas.
+O mural público deve depender de consentimento explícito.
+O sistema deve permitir anonimato.
+Não criar campos públicos que exponham CPF, endereço, telefone ou e-mail.
+Preferências de comunicação e privacidade precisam estar modeladas.
+O que não implementar agora
+
+Não criar CRUDs completos, telas, APIs públicas, autenticação, pagamentos, webhooks, integração Asaas, upload de arquivos ou lógica de QR Code.
+
+Testes obrigatórios
+Rodar migration no MySQL local.
+Rodar seed no MySQL local.
+Validar que as tabelas foram criadas.
+Validar constraints principais.
+Validar relações entre usuários, roles e permissões.
+Validar que pix_donations aceita status próprios.
+Validar que payments não depende de Pix manual.
+Validar que campos Json funcionam no MySQL.
+Validar que campos monetários usam Decimal, não Float.
+Validar que IDs externos do Asaas possuem índices adequados.
+Validar que txid de Pix manual é único.
+Validar que slugs públicos são únicos onde necessário.
+Critérios de aceite
+
+A fase só estará concluída se:
+
+schema.prisma estiver completo e consistente com MySQL.
+provider = "mysql" estiver configurado corretamente.
+Migration executar sem erro no MySQL 8.0 local.
+Seed inicial executar sem senha hardcoded.
+Prisma Client for gerado.
+apps/api conseguir importar e usar o Prisma.
+Nenhum dado sensível ficar exposto no repositório.
+Não existir configuração remanescente de PostgreSQL.
+O banco local lardosanjos estiver funcional com as tabelas esperadas.
+O modelo preservar a separação entre Pix avulso interno e pagamentos Asaas.
+Entrega final esperada
+
+Ao final da execução, entregue um relatório objetivo contendo:
+
+Arquivos criados.
+Arquivos alterados.
+Comandos executados.
+Resultado das migrations.
+Resultado do seed.
+Como resetar o banco local.
+Como rodar migrations.
+Como rodar seed.
+Como gerar o Prisma Client.
+Como validar manualmente no MySQL local.
+Pendências ou riscos identificados.

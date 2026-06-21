@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Lar dos Anjos Pet">
+  <rect width="512" height="512" rx="96" fill="#2AA98C"/>
+  <circle cx="256" cy="220" r="88" fill="#F7FBF9" opacity="0.95"/>
+  <ellipse cx="200" cy="300" rx="52" ry="64" fill="#F7FBF9" opacity="0.9"/>
+  <ellipse cx="312" cy="300" rx="52" ry="64" fill="#F7FBF9" opacity="0.9"/>
+  <circle cx="228" cy="208" r="10" fill="#6A4F36"/>
+  <circle cx="284" cy="208" r="10" fill="#6A4F36"/>
+  <path d="M236 248c16 18 24 18 40 0" stroke="#6A4F36" stroke-width="8" fill="none" stroke-linecap="round"/>
+</svg>

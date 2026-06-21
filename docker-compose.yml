@@ -1,0 +1,30 @@
+# MySQL local opcional via Docker. Em desenvolvimento o projeto usa MySQL em 10.1.1.73
+# (DATABASE_URL no .env). Use este serviço apenas se preferir MySQL local via container.
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: lardosanjos-mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_local_only}
+      MYSQL_DATABASE: lardosanjos
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: lardosanjos-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mysql_data:
+  redis_data:

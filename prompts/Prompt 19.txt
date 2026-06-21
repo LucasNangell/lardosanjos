@@ -1,0 +1,140 @@
+Você é um full-stack engineer sênior, especialista em campanhas de arrecadação, gamificação ética, consentimento LGPD, ranking opcional, MySQL e UX de engajamento saudável.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 19 — Gestão de Campanhas Específicas e Mural dos Anjos**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Implementar campanhas específicas de arrecadação, mural público de apoiadores com consentimento e sistema inicial de selos.
+
+## Escopo obrigatório
+
+1. Criar páginas admin:
+
+   * `/admin/campanhas`;
+   * `/admin/campanhas/nova`;
+   * `/admin/mural`;
+   * `/admin/selos`.
+2. Criar páginas públicas:
+
+   * `/campanhas`;
+   * `/campanhas/:slug`;
+   * `/mural`.
+3. Criar endpoints:
+
+   * CRUD campanhas;
+   * listagem pública de campanhas;
+   * progresso de campanha;
+   * mural público;
+   * gestão admin do mural;
+   * atribuição/listagem de selos.
+4. Campanha deve conter:
+
+   * título;
+   * slug;
+   * descrição;
+   * meta;
+   * valor arrecadado confirmado;
+   * data inicial/final;
+   * status;
+   * animal vinculado;
+   * imagem de capa.
+5. Progresso da campanha deve somar:
+
+   * pagamentos Asaas confirmados;
+   * Pix manuais confirmados;
+   * nunca pendentes.
+6. Mural deve respeitar:
+
+   * consentimento explícito;
+   * anonimato;
+   * nome público;
+   * não exibir valor se usuário não autorizar.
+7. Criar reconhecimento por:
+
+   * constância;
+   * primeira doação;
+   * assinatura ativa;
+   * anonimato;
+   * campanhas.
+8. Criar ranking opcional sem manipulação abusiva.
+
+## Correções obrigatórias
+
+1. Não destacar apenas maiores valores.
+2. Criar também reconhecimento por tempo de apoio.
+3. Usuário sem consentimento não aparece.
+4. Usuário anônimo aparece apenas como “Anjo Anônimo”, se autorizado.
+5. Doação pendente não incrementa campanha.
+6. Pix rejeitado não entra no mural.
+7. Não exibir e-mail, CPF, telefone ou endereço.
+8. Usar MySQL via Prisma.
+9. Não usar funções específicas de PostgreSQL.
+
+## Segurança e LGPD
+
+1. Consentimento registrado.
+2. Preferências respeitadas.
+3. Não expor dados pessoais.
+4. Admin pode ocultar entrada do mural.
+5. Auditoria em alterações manuais.
+6. Opt-in deve ser claro.
+7. Opt-out deve ser respeitado.
+
+## Testes obrigatórios
+
+1. Criar campanha.
+2. Vincular doação confirmada.
+3. Pix pendente não incrementa.
+4. Asaas pendente não incrementa.
+5. Doador com consentimento aparece.
+6. Doador sem consentimento não aparece.
+7. Doador anônimo não expõe nome.
+8. Selos são atribuídos corretamente.
+9. Totais de campanha batem com MySQL.
+10. Responsividade mobile.
+
+## Critérios de aceite
+
+1. Campanhas públicas funcionam.
+2. Mural respeita privacidade.
+3. Progresso financeiro é confiável.
+4. Build e testes passam.
+5. Engajamento é ético e sem dark patterns.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar campanha com doação Pix confirmada.
+4. Como validar campanha com Asaas confirmado.
+5. Como conferir progresso no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---
+

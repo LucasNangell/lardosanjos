@@ -1,0 +1,129 @@
+Você é um engenheiro full-stack sênior, especialista em arquitetura monorepo, TypeScript, Next.js, NestJS, Turborepo, Docker, MySQL, Redis e boas práticas de setup profissional.
+
+Antes de implementar, leia integralmente o arquivo PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md e execute somente a Fase 1 — Diagnóstico, Setup e Padronização do Projeto.
+
+Regras obrigatórias para esta execução
+Não implemente funcionalidades de fases futuras.
+Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+Não quebre funcionalidades já implementadas em fases anteriores.
+Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+Não trate pagamento pendente como pagamento confirmado.
+Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+Sempre atualize ou crie testes compatíveis com a fase.
+Ao final, informe:
+arquivos criados;
+arquivos alterados;
+comandos executados;
+testes realizados;
+pendências;
+como validar manualmente;
+riscos ou decisões técnicas tomadas.
+Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+Objetivo da fase
+
+Criar a base inicial profissional do projeto em monorepo com Turborepo, pnpm, TypeScript, ESLint, Prettier, Docker local, apps separados e pacotes compartilhados, utilizando MySQL 8.0 local como banco relacional e Redis para filas/cache.
+
+Escopo obrigatório
+Analisar a estrutura atual do projeto.
+Confirmar se o projeto está vazio ou parcialmente iniciado.
+Criar estrutura monorepo com Turborepo e pnpm.
+Criar obrigatoriamente:
+apps/web — Next.js App Router para portal público e área do doador;
+apps/admin — Next.js App Router para painel administrativo;
+apps/api — NestJS com Fastify;
+packages/ui;
+packages/database;
+packages/validators;
+packages/types;
+packages/config, se útil.
+Criar pnpm-workspace.yaml.
+Criar turbo.json.
+Criar package.json raiz com scripts:
+dev;
+build;
+lint;
+test;
+format;
+typecheck.
+Configurar TypeScript compartilhado.
+Configurar ESLint e Prettier no root.
+Configurar .gitignore.
+Criar docker-compose.yml local com:
+MySQL 8.0;
+Redis.
+Configurar o MySQL local com:
+imagem: mysql:8.0;
+usuário: root;
+senha: CreativeStudio@2026;
+database: lardosanjos;
+porta: 3306;
+charset/collation recomendado: utf8mb4.
+Criar .env.example para:
+root;
+apps/api;
+apps/web;
+apps/admin.
+Incluir nos .env.example a string:
+DATABASE_URL="mysql://root:CreativeStudio%402026@localhost:3306/lardosanjos".
+Adicionar comentário explicando que o caractere @ da senha deve ser codificado como %40 na URL.
+Criar endpoint básico /health no backend.
+Criar página inicial temporária em apps/web.
+Criar página inicial temporária em apps/admin.
+Garantir que o projeto compile.
+Correções obrigatórias desta fase
+Não usar PostgreSQL.
+Não configurar postgres, pg, pg_dump, postgresql:// ou qualquer provider PostgreSQL.
+Usar MySQL 8.0 no Docker.
+Criar também apps/admin, pois a arquitetura do plano prevê apps/web, apps/admin e apps/api.
+O que não implementar agora
+
+Não implemente migrations completas, autenticação, layouts finais, pagamentos, Pix, Asaas, área do doador, admin financeiro, animais, campanhas, PWA ou deploy.
+
+Segurança mínima
+Configurar CORS de forma restrita e parametrizada por .env.
+Usar Helmet no backend.
+Não criar secrets reais no código.
+Não versionar .env.
+Não tratar a senha local do MySQL como secret de produção; ela deve aparecer apenas em .env.example e Docker local conforme definido no plano.
+Testes e validações obrigatórias
+
+Execute ou prepare:
+
+pnpm install;
+pnpm build;
+pnpm lint;
+pnpm typecheck, se configurado;
+subir MySQL e Redis com Docker;
+testar conexão local com MySQL usando:
+host localhost;
+porta 3306;
+database lardosanjos;
+usuário root;
+senha CreativeStudio@2026;
+testar endpoint /health.
+Critérios de aceite
+
+A fase só estará concluída se:
+
+pnpm build funcionar no monorepo.
+apps/web, apps/admin e apps/api existirem.
+MySQL 8.0 e Redis subirem via Docker.
+DATABASE_URL estiver configurada para MySQL.
+/health responder corretamente.
+Nenhuma funcionalidade futura tiver sido implementada indevidamente.
+A documentação mínima de setup local estiver atualizada.
+Entrega final esperada
+
+Ao final da execução, entregue um relatório objetivo contendo:
+
+Arquivos criados.
+Arquivos alterados.
+Comandos executados.
+Resultado dos testes.
+Como iniciar o projeto localmente.
+Como subir MySQL e Redis.
+Como acessar apps/web, apps/admin e apps/api.
+Como testar o endpoint /health.
+Pendências ou riscos identificados.

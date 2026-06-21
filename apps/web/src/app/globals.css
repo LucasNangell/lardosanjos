@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: 167 60% 41%;
+    --brand-primary-light: 164 47% 88%;
+    --brand-secondary: 164 32% 61%;
+    --brand-accent: 29 42% 55%;
+    --brand-beige: 31 58% 72%;
+    --brand-brown: 29 33% 31%;
+    --brand-text: 200 19% 18%;
+    --brand-bg: 150 33% 98%;
+    --radius: 0.75rem;
+  }
+
+  body {
+    @apply bg-brand-bg text-brand-text antialiased;
+  }
+}

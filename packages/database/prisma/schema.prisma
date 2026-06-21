@@ -1,0 +1,750 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum DonorPublicDisplayType {
+  FULL_NAME
+  FIRST_NAME_ONLY
+  ANONYMOUS
+}
+
+enum SubscriptionBillingType {
+  CREDIT_CARD
+  PIX
+  BOLETO
+}
+
+enum SubscriptionCycle {
+  MONTHLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+  CANCELED
+}
+
+enum PaymentType {
+  ONETIME
+  RECURRING
+}
+
+enum PaymentBillingType {
+  PIX
+  CREDIT_CARD
+  BOLETO
+}
+
+enum PaymentStatus {
+  PENDING
+  RECEIVED
+  CONFIRMED
+  OVERDUE
+  REFUNDED
+  FAILED
+  CANCELED
+}
+
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  RANDOM_KEY
+}
+
+enum PixDonationStatus {
+  PIX_GERADO
+  COMPROVANTE_ENVIADO
+  AGUARDANDO_CONFIRMACAO_MANUAL
+  CONFIRMADO_MANUALMENTE
+  REJEITADO
+  EXPIRADO
+  DUPLICADO
+}
+
+enum PixConfirmationAction {
+  GENERATE
+  ATTACH_RECEIPT
+  MARK_AS_PAID
+  CONFIRM
+  REJECT
+  MARK_DUPLICATE
+  EXPIRE
+}
+
+enum AnimalSpecies {
+  DOG
+  CAT
+  OTHER
+}
+
+enum AnimalGender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum AnimalSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELED
+}
+
+enum DonorCardStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum BadgeRuleType {
+  FIRST_DONATION
+  MONTHS_ACTIVE
+  TOTAL_AMOUNT
+  SUBSCRIPTION
+  MANUAL
+}
+
+// ─── Auth & RBAC ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(uuid()) @db.VarChar(36)
+  name         String     @db.VarChar(255)
+  email        String     @unique @db.VarChar(255)
+  phone        String?    @db.VarChar(50)
+  passwordHash String     @map("password_hash") @db.VarChar(255)
+  status       UserStatus @default(ACTIVE)
+  totpSecretEnc String?   @map("totp_secret_enc") @db.Text
+  totpEnabledAt DateTime? @map("totp_enabled_at")
+  totpBackupCodes Json?   @map("totp_backup_codes")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  donor              Donor?
+  userRoles          UserRole[]
+  auditLogs          AuditLog[]
+  refreshTokens      RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  pixSettingsCreated PixSetting[] @relation("PixSettingCreatedBy")
+  pixSettingsUpdated PixSetting[] @relation("PixSettingUpdatedBy")
+  pixDonationsConfirmed PixDonation[] @relation("PixDonationConfirmedBy")
+  pixDonationsRejected  PixDonation[] @relation("PixDonationRejectedBy")
+  pixConfirmations   PixPaymentConfirmation[]
+  expensesCreated    Expense[]
+  uploadedFiles      UploadedFile[]
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.VarChar(36)
+  permissionId String @map("permission_id") @db.VarChar(36)
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.VarChar(36)
+  roleId String @map("role_id") @db.VarChar(36)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  tokenHash String   @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  tokenHash String   @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("password_reset_tokens")
+}
+
+// ─── Donors & Plans ──────────────────────────────────────────────────────────
+
+model Donor {
+  id                    String                 @id @default(uuid()) @db.VarChar(36)
+  userId                String?                @unique @map("user_id") @db.VarChar(36)
+  fullName              String                 @map("full_name") @db.VarChar(255)
+  publicName            String?                @map("public_name") @db.VarChar(255)
+  cpfCnpj               String?                @map("cpf_cnpj") @db.VarChar(20)
+  email                 String                 @db.VarChar(255)
+  phone                 String?                @db.VarChar(50)
+  birthDate             DateTime?              @map("birth_date") @db.Date
+  zipCode               String?                @map("zip_code") @db.VarChar(20)
+  address               String?                @db.VarChar(255)
+  addressNumber         String?                @map("address_number") @db.VarChar(50)
+  addressComplement     String?                @map("address_complement") @db.VarChar(255)
+  neighborhood          String?                @db.VarChar(100)
+  city                  String?                @db.VarChar(100)
+  state                 String?                @db.VarChar(2)
+  wantsPublicProfile    Boolean                @default(false) @map("wants_public_profile")
+  publicDisplayType     DonorPublicDisplayType @default(ANONYMOUS) @map("public_display_type")
+  communicationEmail    Boolean                @default(true) @map("communication_email")
+  communicationWhatsapp Boolean                @default(false) @map("communication_whatsapp")
+  asaasCustomerId       String?                @map("asaas_customer_id") @db.VarChar(100)
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+
+  user              User?              @relation(fields: [userId], references: [id])
+  subscriptions     Subscription[]
+  payments          Payment[]
+  pixDonations      PixDonation[]
+  donorBadges       DonorBadge[]
+  donorCards        DonorCard[]
+  publicMuralEntries PublicMuralEntry[]
+
+  @@index([email])
+  @@index([cpfCnpj])
+  @@index([asaasCustomerId])
+  @@map("donors")
+}
+
+model DonationPlan {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  name         String   @db.VarChar(255)
+  slug         String   @unique @db.VarChar(255)
+  value        Decimal  @db.Decimal(10, 2)
+  description  String?  @db.Text
+  impactText   String?  @map("impact_text") @db.VarChar(255)
+  badgeName    String?  @map("badge_name") @db.VarChar(100)
+  badgeColor   String?  @map("badge_color") @db.VarChar(50)
+  isActive     Boolean  @default(true) @map("is_active")
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@index([isActive])
+  @@index([slug])
+  @@map("donation_plans")
+}
+
+model Subscription {
+  id                   String                  @id @default(uuid()) @db.VarChar(36)
+  donorId              String                  @map("donor_id") @db.VarChar(36)
+  planId               String                  @map("plan_id") @db.VarChar(36)
+  asaasSubscriptionId  String?                 @unique @map("asaas_subscription_id") @db.VarChar(100)
+  billingType          SubscriptionBillingType @map("billing_type")
+  value                Decimal                 @db.Decimal(10, 2)
+  cycle                SubscriptionCycle       @default(MONTHLY)
+  status               SubscriptionStatus      @default(PENDING)
+  nextDueDate          DateTime?               @map("next_due_date") @db.Date
+  startedAt            DateTime?               @map("started_at")
+  canceledAt           DateTime?               @map("canceled_at")
+  cancelReason         String?                 @map("cancel_reason") @db.Text
+  createdAt            DateTime                @default(now()) @map("created_at")
+  updatedAt            DateTime                @updatedAt @map("updated_at")
+
+  donor    Donor         @relation(fields: [donorId], references: [id])
+  plan     DonationPlan  @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([donorId])
+  @@index([status])
+  @@index([asaasSubscriptionId])
+  @@map("subscriptions")
+}
+
+// ─── Asaas Payments (NOT manual Pix) ─────────────────────────────────────────
+
+model Payment {
+  id              String             @id @default(uuid()) @db.VarChar(36)
+  donorId         String             @map("donor_id") @db.VarChar(36)
+  subscriptionId  String?            @map("subscription_id") @db.VarChar(36)
+  asaasPaymentId  String             @unique @map("asaas_payment_id") @db.VarChar(100)
+  type            PaymentType
+  billingType     PaymentBillingType @map("billing_type")
+  value           Decimal            @db.Decimal(10, 2)
+  status          PaymentStatus      @default(PENDING)
+  dueDate         DateTime           @map("due_date") @db.Date
+  paidAt          DateTime?          @map("paid_at")
+  receivedAt      DateTime?          @map("received_at")
+  invoiceUrl      String?            @map("invoice_url") @db.VarChar(255)
+  pixQrCode       String?            @map("pix_qr_code") @db.LongText
+  pixCopyPaste    String?            @map("pix_copy_paste") @db.LongText
+  boletoUrl       String?            @map("boleto_url") @db.VarChar(255)
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  donor             Donor              @relation(fields: [donorId], references: [id])
+  subscription      Subscription?      @relation(fields: [subscriptionId], references: [id])
+  campaignDonations CampaignDonation[]
+
+  @@index([donorId])
+  @@index([status])
+  @@index([asaasPaymentId])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// ─── Manual Pix (internal BR Code/EMV) ───────────────────────────────────────
+
+model PixSetting {
+  id                   String     @id @default(uuid()) @db.VarChar(36)
+  receiverName         String     @map("receiver_name") @db.VarChar(255)
+  receiverCity         String     @map("receiver_city") @db.VarChar(100)
+  pixKey               String     @map("pix_key") @db.VarChar(255)
+  pixKeyType           PixKeyType @map("pix_key_type")
+  defaultDescription   String?    @map("default_description") @db.VarChar(255)
+  defaultTxid          String?    @map("default_txid") @db.VarChar(255)
+  minAmount            Decimal    @default(1.00) @map("min_amount") @db.Decimal(10, 2)
+  allowCustomAmount    Boolean    @default(true) @map("allow_custom_amount")
+  quickAmounts         Json?      @map("quick_amounts")
+  instructions         String?    @db.Text
+  requireDonorData     Boolean    @default(false) @map("require_donor_data")
+  requireReceiptUpload Boolean    @default(true) @map("require_receipt_upload")
+  hideSensitiveDetails Boolean    @default(false) @map("hide_sensitive_details")
+  isActive             Boolean    @default(true) @map("is_active")
+  environment          String     @default("PRODUCTION") @db.VarChar(50)
+  createdById          String?    @map("created_by") @db.VarChar(36)
+  updatedById          String?    @map("updated_by") @db.VarChar(36)
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
+
+  createdBy User? @relation("PixSettingCreatedBy", fields: [createdById], references: [id])
+  updatedBy User? @relation("PixSettingUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("pix_settings")
+}
+
+model PixDonation {
+  id                   String            @id @default(uuid()) @db.VarChar(36)
+  donorId              String?           @map("donor_id") @db.VarChar(36)
+  donorName            String?           @map("donor_name") @db.VarChar(255)
+  donorEmail           String?           @map("donor_email") @db.VarChar(255)
+  donorPhone           String?           @map("donor_phone") @db.VarChar(50)
+  amount               Decimal           @db.Decimal(10, 2)
+  pixPayload           String            @map("pix_payload") @db.LongText
+  pixQrCodeBase64      String?           @map("pix_qr_code_base64") @db.LongText
+  txid                 String            @unique @db.VarChar(255)
+  status               PixDonationStatus @default(PIX_GERADO)
+  wantsPublicMural     Boolean           @default(false) @map("wants_public_mural")
+  wantsAnonymous       Boolean           @default(true) @map("wants_anonymous")
+  donorMessage         String?           @map("donor_message") @db.Text
+  receiptFileId        String?           @map("receipt_file_id") @db.VarChar(36)
+  markedAsPaidAt       DateTime?         @map("marked_as_paid_at")
+  manuallyConfirmedAt  DateTime?         @map("manually_confirmed_at")
+  manuallyConfirmedById String?          @map("manually_confirmed_by") @db.VarChar(36)
+  rejectedAt           DateTime?         @map("rejected_at")
+  rejectedById         String?           @map("rejected_by") @db.VarChar(36)
+  rejectionReason      String?           @map("rejection_reason") @db.Text
+  expiresAt            DateTime          @map("expires_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  donor              Donor?                   @relation(fields: [donorId], references: [id])
+  receiptFile        UploadedFile?            @relation(fields: [receiptFileId], references: [id])
+  manuallyConfirmedBy User?                   @relation("PixDonationConfirmedBy", fields: [manuallyConfirmedById], references: [id])
+  rejectedBy         User?                    @relation("PixDonationRejectedBy", fields: [rejectedById], references: [id])
+  confirmations      PixPaymentConfirmation[]
+  campaignDonations  CampaignDonation[]
+  publicMuralEntries PublicMuralEntry[]
+
+  @@index([donorId])
+  @@index([status])
+  @@index([txid])
+  @@index([createdAt])
+  @@index([donorEmail])
+  @@map("pix_donations")
+}
+
+model PixPaymentConfirmation {
+  id             String                @id @default(uuid()) @db.VarChar(36)
+  pixDonationId  String                @map("pix_donation_id") @db.VarChar(36)
+  action         PixConfirmationAction
+  previousStatus PixDonationStatus?    @map("previous_status")
+  newStatus      PixDonationStatus     @map("new_status")
+  adminUserId    String?               @map("admin_user_id") @db.VarChar(36)
+  note           String?               @db.Text
+  createdAt      DateTime              @default(now()) @map("created_at")
+
+  pixDonation PixDonation @relation(fields: [pixDonationId], references: [id], onDelete: Cascade)
+  adminUser   User?       @relation(fields: [adminUserId], references: [id])
+
+  @@index([pixDonationId])
+  @@map("pix_payment_confirmations")
+}
+
+// ─── Asaas Webhooks ──────────────────────────────────────────────────────────
+
+model AsaasWebhookEvent {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  eventId      String    @unique @map("event_id") @db.VarChar(255)
+  eventType    String    @map("event_type") @db.VarChar(100)
+  payload      Json
+  processed    Boolean   @default(false)
+  processedAt  DateTime? @map("processed_at")
+  errorMessage String?   @map("error_message") @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([processed])
+  @@index([eventType])
+  @@map("asaas_webhook_events")
+}
+
+// ─── Finance & Transparency ────────────────────────────────────────────────────
+
+model ExpenseCategory {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  name      String    @db.VarChar(150)
+  icon      String?   @db.VarChar(100)
+  color     String?   @db.VarChar(50)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  expenses Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id                String   @id @default(uuid()) @db.VarChar(36)
+  categoryId        String   @map("category_id") @db.VarChar(36)
+  title             String   @db.VarChar(255)
+  description       String?  @db.Text
+  publicDescription String   @map("public_description") @db.Text
+  amount            Decimal  @db.Decimal(10, 2)
+  date              DateTime @db.Date
+  supplier          String?  @db.VarChar(255)
+  receiptFileId     String?  @map("receipt_file_id") @db.VarChar(36)
+  isPublic          Boolean  @default(true) @map("is_public")
+  createdById       String   @map("created_by") @db.VarChar(36)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+  receiptFile UploadedFile?   @relation(fields: [receiptFileId], references: [id])
+  createdBy   User            @relation(fields: [createdById], references: [id])
+
+  @@index([categoryId])
+  @@index([date])
+  @@index([isPublic])
+  @@map("expenses")
+}
+
+model TransparencyReport {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  month        Int
+  year         Int
+  summary      String?   @db.Text
+  totalIncome  Decimal   @map("total_income") @db.Decimal(10, 2)
+  totalExpense Decimal   @map("total_expense") @db.Decimal(10, 2)
+  netBalance   Decimal   @map("net_balance") @db.Decimal(10, 2)
+  isPublished  Boolean   @default(false) @map("is_published")
+  publishedAt  DateTime? @map("published_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@unique([month, year])
+  @@map("transparency_reports")
+}
+
+// ─── Animals & Campaigns ───────────────────────────────────────────────────────
+
+model Animal {
+  id            String        @id @default(uuid()) @db.VarChar(36)
+  name          String        @db.VarChar(255)
+  species       AnimalSpecies
+  gender        AnimalGender
+  age           String?       @db.VarChar(100)
+  size          AnimalSize?
+  status        String        @db.VarChar(100)
+  story         String        @db.Text
+  needs         String?       @db.Text
+  internalNotes String?       @map("internal_notes") @db.Text
+  coverImageId  String?       @map("cover_image_id") @db.VarChar(36)
+  isPublic      Boolean       @default(true) @map("is_public")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  coverImage        UploadedFile?           @relation(fields: [coverImageId], references: [id])
+  images            AnimalImage[]
+  campaigns         Campaign[]
+  adoptionInquiries AnimalAdoptionInquiry[]
+
+  @@index([species])
+  @@index([isPublic])
+  @@map("animals")
+}
+
+model AnimalImage {
+  id             String @id @default(uuid()) @db.VarChar(36)
+  animalId       String @map("animal_id") @db.VarChar(36)
+  uploadedFileId String @map("uploaded_file_id") @db.VarChar(36)
+  displayOrder   Int    @default(0) @map("display_order")
+
+  animal       Animal       @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  uploadedFile UploadedFile @relation(fields: [uploadedFileId], references: [id])
+
+  @@index([animalId])
+  @@map("animal_images")
+}
+
+model AnimalAdoptionInquiry {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  animalId  String   @map("animal_id") @db.VarChar(36)
+  name      String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  phone     String?  @db.VarChar(50)
+  message   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@index([createdAt])
+  @@map("animal_adoption_inquiries")
+}
+
+model Campaign {
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  title         String         @db.VarChar(255)
+  slug          String         @unique @db.VarChar(255)
+  description   String         @db.Text
+  goalAmount    Decimal        @map("goal_amount") @db.Decimal(10, 2)
+  raisedAmount  Decimal        @default(0) @map("raised_amount") @db.Decimal(10, 2)
+  status        CampaignStatus @default(DRAFT)
+  startsAt      DateTime?      @map("starts_at")
+  endsAt        DateTime?      @map("ends_at")
+  animalId      String?        @map("animal_id") @db.VarChar(36)
+  coverImageId  String?        @map("cover_image_id") @db.VarChar(36)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  animal            Animal?            @relation(fields: [animalId], references: [id])
+  coverImage        UploadedFile?      @relation("CampaignCoverImage", fields: [coverImageId], references: [id])
+  campaignDonations CampaignDonation[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignDonation {
+  id            String  @id @default(uuid()) @db.VarChar(36)
+  campaignId    String  @map("campaign_id") @db.VarChar(36)
+  paymentId     String? @map("payment_id") @db.VarChar(36)
+  pixDonationId String? @map("pix_donation_id") @db.VarChar(36)
+
+  campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  payment     Payment?     @relation(fields: [paymentId], references: [id])
+  pixDonation PixDonation? @relation(fields: [pixDonationId], references: [id])
+
+  @@index([campaignId])
+  @@map("campaign_donations")
+}
+
+// ─── Badges & Cards ────────────────────────────────────────────────────────────
+
+model Badge {
+  id          String        @id @default(uuid()) @db.VarChar(36)
+  name        String        @db.VarChar(100)
+  description String?       @db.Text
+  icon        String?       @db.VarChar(100)
+  ruleType    BadgeRuleType @map("rule_type")
+  ruleValue   Int?          @map("rule_value")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  donorBadges DonorBadge[]
+
+  @@map("badges")
+}
+
+model DonorBadge {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  donorId   String   @map("donor_id") @db.VarChar(36)
+  badgeId   String   @map("badge_id") @db.VarChar(36)
+  awardedAt DateTime @default(now()) @map("awarded_at")
+
+  donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([donorId, badgeId])
+  @@map("donor_badges")
+}
+
+model DonorCard {
+  id           String          @id @default(uuid()) @db.VarChar(36)
+  donorId      String          @map("donor_id") @db.VarChar(36)
+  cardNumber   String          @unique @map("card_number") @db.VarChar(100)
+  status       DonorCardStatus @default(ACTIVE)
+  qrCodeSecret String          @map("qr_code_secret") @db.VarChar(255)
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
+
+  @@index([donorId])
+  @@map("donor_cards")
+}
+
+// ─── Public Content ────────────────────────────────────────────────────────────
+
+model PublicMuralEntry {
+  id            String  @id @default(uuid()) @db.VarChar(36)
+  donorId       String? @map("donor_id") @db.VarChar(36)
+  pixDonationId String? @map("pix_donation_id") @db.VarChar(36)
+  displayName   String  @map("display_name") @db.VarChar(255)
+  planName      String? @map("plan_name") @db.VarChar(100)
+  impactMonths  Int?    @map("impact_months")
+  message       String? @db.VarChar(255)
+  isVisible     Boolean @default(true) @map("is_visible")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  donor       Donor?       @relation(fields: [donorId], references: [id])
+  pixDonation PixDonation? @relation(fields: [pixDonationId], references: [id])
+
+  @@index([isVisible])
+  @@map("public_mural_entries")
+}
+
+model ContentPage {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  slug      String   @unique @db.VarChar(255)
+  title     String   @db.VarChar(255)
+  content   String   @db.LongText
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@map("content_pages")
+}
+
+model FaqItem {
+  id           String  @id @default(uuid()) @db.VarChar(36)
+  question     String  @db.VarChar(255)
+  answer       String  @db.Text
+  displayOrder Int     @default(0) @map("display_order")
+  isPublished  Boolean @default(true) @map("is_published")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([isPublished])
+  @@map("faq_items")
+}
+
+// ─── Audit & System ────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  userId    String?  @map("user_id") @db.VarChar(36)
+  action    String   @db.VarChar(100)
+  entity    String   @db.VarChar(100)
+  entityId  String?  @map("entity_id") @db.VarChar(100)
+  oldData   Json?    @map("old_data")
+  newData   Json?    @map("new_data")
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  key         String   @unique @db.VarChar(255)
+  value       String   @db.Text
+  description String?  @db.Text
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model UploadedFile {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  fileKey    String   @map("file_key") @db.VarChar(255)
+  bucketName String   @map("bucket_name") @db.VarChar(255)
+  mimeType   String   @map("mime_type") @db.VarChar(100)
+  fileSize   Int      @map("file_size")
+  uploadedById String? @map("uploaded_by") @db.VarChar(36)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  uploadedBy    User?         @relation(fields: [uploadedById], references: [id])
+  pixDonations  PixDonation[]
+  expenses      Expense[]
+  animalImages  AnimalImage[]
+  animals       Animal[]
+  campaigns     Campaign[]    @relation("CampaignCoverImage")
+
+  @@index([fileKey])
+  @@map("uploaded_files")
+}

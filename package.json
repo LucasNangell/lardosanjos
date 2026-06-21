@@ -1,0 +1,41 @@
+{
+  "name": "lardosanjos-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "typecheck": "turbo run typecheck",
+    "check:secrets": "node scripts/check-no-secrets.mjs",
+    "db:generate": "pnpm --filter @lardosanjos/database prisma:generate",
+    "db:migrate": "pnpm --filter @lardosanjos/database prisma:migrate",
+    "db:migrate:deploy": "pnpm --filter @lardosanjos/database prisma:migrate:deploy",
+    "db:seed": "pnpm --filter @lardosanjos/database prisma:seed",
+    "db:reset": "pnpm --filter @lardosanjos/database prisma:reset",
+    "prisma:generate": "pnpm --filter @lardosanjos/database prisma:generate",
+    "prisma:migrate": "pnpm --filter @lardosanjos/database prisma:migrate",
+    "prisma:migrate:deploy": "pnpm --filter @lardosanjos/database prisma:migrate:deploy",
+    "prisma:seed": "pnpm --filter @lardosanjos/database prisma:seed",
+    "build:deps": "pnpm --filter @lardosanjos/types build && pnpm --filter @lardosanjos/validators build && pnpm --filter @lardosanjos/ui build && pnpm --filter @lardosanjos/database build",
+    "build:api": "pnpm build:deps && pnpm --filter api build",
+    "start:api": "node apps/api/dist/main.js",
+    "build:web": "pnpm build:deps && pnpm --filter web build",
+    "start:web": "pnpm --filter web start",
+    "build:admin": "pnpm build:deps && pnpm --filter admin build",
+    "start:admin": "pnpm --filter admin start",
+    "hostinger:build:api": "corepack enable && pnpm install --frozen-lockfile && pnpm build:api",
+    "hostinger:build:web": "corepack enable && pnpm install --frozen-lockfile && pnpm build:web",
+    "hostinger:build:admin": "corepack enable && pnpm install --frozen-lockfile && pnpm build:admin"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

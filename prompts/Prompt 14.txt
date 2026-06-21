@@ -1,0 +1,121 @@
+Você é um full-stack engineer sênior, especialista em painéis administrativos, segurança financeira, Pix BR Code, RBAC, auditoria, MySQL e NestJS.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 14 — Admin: Configurações de Pix Avulso Próprio**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar o módulo administrativo para cadastrar e gerenciar os dados Pix usados na geração de doações únicas por BR Code/EMV sem Asaas.
+
+## Escopo obrigatório
+
+1. Criar página admin:
+
+   * `/admin/configuracoes/pix`;
+   * ou equivalente dentro de `apps/admin`.
+2. Criar endpoints:
+
+   * `GET /api/v1/admin/pix/settings`;
+   * `PUT /api/v1/admin/pix/settings`;
+   * `POST /api/v1/admin/pix/settings/test`.
+3. Campos obrigatórios:
+
+   * nome do recebedor;
+   * cidade do recebedor;
+   * chave Pix;
+   * tipo da chave;
+   * descrição padrão;
+   * txid padrão, se aplicável;
+   * valor mínimo;
+   * valores rápidos;
+   * permitir valor personalizado;
+   * instruções públicas;
+   * exigir dados do doador;
+   * exigir comprovante;
+   * ocultar dados sensíveis;
+   * status ativo/inativo;
+   * ambiente.
+4. Criar botão “Gerar QR Code de teste”.
+5. Exibir Pix Copia e Cola de teste.
+6. Validar campos antes de salvar.
+7. Registrar toda alteração em `audit_logs`.
+
+## Correções obrigatórias
+
+1. Apenas usuário com `PIX_SETTINGS_WRITE` pode alterar.
+2. Usuário com permissão insuficiente não pode ver chave completa se a regra exigir ocultação.
+3. Alterar Pix deve atualizar imediatamente o checkout público.
+4. Não implementar confirmação de doações nesta fase.
+5. Não chamar Asaas.
+6. Não armazenar chave Pix em local diferente de `pix_settings`.
+
+## O que não implementar agora
+
+Não implementar tela de confirmação Pix, transparência, mural ou relatórios.
+
+## Segurança obrigatória
+
+1. Mascarar chave Pix quando apropriado.
+2. Auditar leitura/alteração de dados sensíveis.
+3. Validar tipo de chave Pix.
+4. Não logar chave completa desnecessariamente.
+5. Proteger rota por RBAC.
+6. Não permitir configuração ativa inválida.
+7. Não expor chave completa em endpoint público se `hide_sensitive_details` estiver ativo.
+
+## Testes obrigatórios
+
+1. Admin autorizado salva configuração.
+2. Usuário sem permissão é bloqueado.
+3. Chave inválida é rejeitada.
+4. QR Code de teste é gerado.
+5. Alteração aparece em auditoria.
+6. Checkout público usa nova configuração.
+7. Build e testes passam.
+8. Dados são persistidos no MySQL.
+9. Não há chamada ao Asaas.
+
+## Critérios de aceite
+
+1. Administração consegue configurar Pix.
+2. Sistema gera teste BR Code válido.
+3. Permissões funcionam.
+4. Auditoria registra alterações.
+5. Checkout público respeita nova configuração.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar uma chave Pix.
+4. Como gerar QR Code de teste.
+5. Como conferir configuração no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---
+

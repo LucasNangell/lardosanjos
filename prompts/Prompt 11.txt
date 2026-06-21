@@ -1,0 +1,123 @@
+Você é um full-stack engineer sênior, especialista em áreas logadas, privacidade de dados, UX para doadores, Next.js, NestJS, MySQL, Prisma e TanStack Query.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 11 — Área do Doador: Dashboard, Impacto e Histórico**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar a área logada do doador, com dashboard, histórico de doações, dados pessoais e preferências de privacidade.
+
+## Escopo obrigatório
+
+1. Criar rotas protegidas em `apps/web`:
+
+   * `/dashboard`;
+   * `/dashboard/doacoes`;
+   * `/dashboard/meu-impacto`;
+   * `/dashboard/meus-dados`;
+   * `/dashboard/privacidade`.
+2. Criar shell/layout do doador.
+3. Criar endpoints:
+
+   * `GET /api/v1/donor/profile`;
+   * `PUT /api/v1/donor/profile`;
+   * `GET /api/v1/donor/donations`;
+   * `GET /api/v1/donor/impact`;
+   * `PUT /api/v1/donor/privacy-preferences`.
+4. Histórico deve mesclar:
+
+   * pagamentos Asaas confirmados/recebidos;
+   * Pix manuais confirmados administrativamente.
+5. Não exibir:
+
+   * Pix gerado;
+   * Pix aguardando confirmação;
+   * Pix rejeitado;
+   * pagamento Asaas pendente como confirmado.
+6. Criar cards:
+
+   * total confirmado doado;
+   * meses de apoio;
+   * plano atual, se houver;
+   * próxima cobrança, se houver;
+   * selos, se houver.
+7. Criar estados vazios amigáveis.
+8. Criar mensagens claras de privacidade e anonimato.
+
+## Correções obrigatórias
+
+1. Um doador nunca pode acessar dados de outro doador.
+2. Pix pendente não pode aparecer como impacto confirmado.
+3. Se o doador não tiver conta mas tiver doações por e-mail, não vincular automaticamente sem critério seguro.
+4. Respeitar preferências de anonimato e mural.
+5. Usar MySQL via Prisma sem SQL específico de PostgreSQL.
+6. Não criar carteirinha nesta fase.
+
+## O que não implementar agora
+
+Não implementar alteração de plano, cancelamento, carteirinha, admin, transparência, animais ou campanhas.
+
+## Segurança obrigatória
+
+1. Isolamento por usuário autenticado.
+2. Proteção contra IDOR.
+3. Não expor CPF completo desnecessariamente.
+4. Permitir solicitação futura de exclusão de dados, mas não executar exclusão total ainda.
+5. Atualizar `audit_logs` em alterações sensíveis.
+6. Não retornar dados internos do Asaas desnecessariamente.
+
+## Testes obrigatórios
+
+1. Doador autenticado acessa próprio perfil.
+2. Doador não acessa perfil de outro.
+3. Histórico mostra pagamentos confirmados.
+4. Histórico não mostra pendentes como confirmados.
+5. Preferência de anonimato salva.
+6. Responsividade mobile.
+7. Estados vazios.
+8. Consultas funcionam no MySQL.
+9. Dados de `payments` e `pix_donations` são mesclados corretamente.
+
+## Critérios de aceite
+
+1. Área do doador funcional.
+2. Histórico financeiro respeita status reais.
+3. Privacidade é respeitada.
+4. Build e testes passam.
+5. Não há vazamento de dados entre doadores.
+
+## Entrega final esperada
+
+Ao final, documente:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar a área do doador.
+4. Como conferir dados no MySQL.
+5. Testes executados.
+6. Pendências e riscos.
+
+---
+

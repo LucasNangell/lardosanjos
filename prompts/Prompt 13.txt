@@ -1,0 +1,120 @@
+Você é um frontend/full-stack engineer sênior, especialista em geração de carteirinhas digitais, QR Code, PDF/PNG, privacidade, Next.js, NestJS e experiência de compartilhamento.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 13 — Carteirinha Digital do Doador**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Criar a carteirinha digital do doador, com número de membro, QR Code de validação pública, visual premium, download e compartilhamento.
+
+## Escopo obrigatório
+
+1. Criar página:
+
+   * `/dashboard/carteirinha`.
+2. Criar página pública:
+
+   * `/anjo/validar/:cardNumber`;
+   * ou rota equivalente.
+3. Criar endpoints:
+
+   * `GET /api/v1/donor/card`;
+   * `POST /api/v1/donor/card/generate`;
+   * `GET /api/v1/public/cards/:cardNumber`;
+   * endpoint de download PNG/PDF, se backend for responsável.
+4. Criar ou consultar `donor_cards` no MySQL.
+5. Gerar número único de carteirinha.
+6. Gerar QR Code com URL pública de validação.
+7. Exibir:
+
+   * logo;
+   * nome público;
+   * plano;
+   * status;
+   * data de início;
+   * número de membro;
+   * selos;
+   * QR Code.
+8. Permitir:
+
+   * baixar PNG;
+   * baixar PDF;
+   * compartilhar WhatsApp;
+   * copiar link.
+9. Criar design com gradiente, bordas arredondadas e aparência profissional.
+
+## Correções obrigatórias
+
+1. QR Code público não pode expor CPF, endereço, e-mail, telefone ou dados sensíveis.
+2. Se o doador for anônimo, respeitar nome público.
+3. Carteirinha não deve dizer “ativo” se assinatura estiver cancelada/inadimplente, salvo regra definida.
+4. Pix único confirmado pode gerar reconhecimento, mas não deve ser confundido com assinatura mensal ativa.
+5. Não implementar Apple Wallet/Google Wallet nesta fase.
+6. Não expor dados financeiros na página pública da carteirinha.
+
+## O que não implementar agora
+
+Não implementar Apple Wallet/Google Wallet, impressão física, mural completo ou sistema avançado de selos.
+
+## Segurança obrigatória
+
+1. Validar ownership da carteirinha.
+2. Não expor dados sensíveis na rota pública.
+3. Assinar ou gerar segredo interno para validação.
+4. Registrar geração e alterações em auditoria, se aplicável.
+5. Evitar enumeração massiva de carteirinhas públicas.
+6. Não retornar CPF, telefone, endereço ou e-mail na validação pública.
+
+## Testes obrigatórios
+
+1. Gerar carteirinha.
+2. QR Code abre página pública.
+3. Doador anônimo não expõe nome completo.
+4. Download PNG/PDF funciona.
+5. Doador não acessa carteirinha de outro.
+6. Status cancelado/inativo aparece corretamente.
+7. Layout mobile.
+8. Dados são gravados e lidos do MySQL corretamente.
+
+## Critérios de aceite
+
+1. Carteirinha aparece corretamente.
+2. QR Code valida publicamente sem dados sensíveis.
+3. Downloads funcionam.
+4. Build e testes passam.
+5. Privacidade do doador é preservada.
+
+## Entrega final esperada
+
+Ao final, informe:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar a carteirinha manualmente no celular.
+4. Como conferir dados no MySQL.
+5. Testes executados.
+6. Pendências e riscos.
+
+---

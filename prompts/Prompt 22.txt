@@ -1,0 +1,149 @@
+Você é um DevOps engineer sênior, especialista em Docker, CI/CD, VPS, Vercel, Railway/Render, MySQL, Redis, Sentry, backups com `mysqldump`, Nginx, domínio e publicação segura.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 22 — Deploy, Monitoramento e Produção**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Preparar e executar o deploy de produção com CI/CD, variáveis seguras, banco **MySQL**, Redis, storage, monitoramento, backups, domínio e checklist final.
+
+## Escopo obrigatório
+
+1. Criar configuração de deploy para:
+
+   * `apps/web`;
+   * `apps/admin`;
+   * `apps/api`.
+2. Configurar Dockerfile(s), se necessário.
+3. Configurar `docker-compose.prod.yml`, se aplicável.
+4. Configurar CI/CD com GitHub Actions:
+
+   * install;
+   * lint;
+   * typecheck;
+   * test;
+   * build;
+   * deploy.
+5. Configurar ambientes:
+
+   * local;
+   * desenvolvimento;
+   * homologação;
+   * produção.
+6. Criar `.env.production.example` sem secrets reais.
+7. Configurar banco **MySQL** de produção.
+8. Configurar Redis de produção.
+9. Configurar storage R2/S3.
+10. Configurar Asaas produção.
+11. Configurar Pix real.
+12. Configurar domínio:
+
+* `lardosanjos.online`;
+* subdomínios, se necessário.
+
+13. Configurar HTTPS.
+14. Configurar Nginx/reverse proxy, se usar VPS.
+15. Configurar Sentry ou ferramenta equivalente.
+16. Configurar logs.
+17. Configurar backups automáticos do MySQL.
+18. Criar estratégia de rollback.
+19. Criar checklist final pré-produção.
+20. Criar checklist pós-produção.
+
+## Correções obrigatórias desta fase
+
+1. Não usar PostgreSQL em produção.
+2. Não usar `pg_dump`.
+3. Não configurar container PostgreSQL.
+4. Não usar connection string `postgresql://`.
+5. Usar `DATABASE_URL` compatível com MySQL.
+6. Usar migrations Prisma com provider MySQL.
+7. Backups devem ser feitos com `mysqldump`.
+8. O backup periódico deve rodar a cada 12 horas e enviar para o Cloudflare R2, com retenção de 30 dias, conforme o plano.
+9. Documentar teste de restore do backup MySQL.
+10. Não usar usuário `root` do MySQL em produção, salvo decisão explicitamente justificada e aprovada.
+
+## Segurança obrigatória
+
+1. HTTPS.
+2. Secrets em ambiente seguro.
+3. Backups protegidos.
+4. Logs sem dados sensíveis.
+5. CORS restrito.
+6. Headers de segurança.
+7. Rate limit ativo.
+8. Monitoramento de erro.
+9. Healthchecks.
+10. Plano de rollback.
+11. Usuário de produção do MySQL deve ter permissões mínimas necessárias, evitando usar `root` em produção.
+12. A senha local `CreativeStudio@2026` não deve ser reutilizada como senha de produção.
+13. Backups não devem ficar públicos.
+14. As credenciais do R2 não podem ser expostas.
+
+## Testes obrigatórios
+
+1. Build produção.
+2. Migration em homologação/produção com MySQL.
+3. Healthcheck API.
+4. Login admin.
+5. Fluxo Pix avulso teste.
+6. Fluxo Asaas sandbox/homologação.
+7. Webhook Asaas homologação.
+8. Upload de comprovante.
+9. Transparência.
+10. PWA.
+11. SEO.
+12. Backup com `mysqldump`.
+13. Restore de teste do backup MySQL, se possível.
+14. Rollback simulado, se possível.
+15. Validação de secrets ausentes no repositório.
+
+## Critérios de aceite
+
+1. Site publicado com domínio e HTTPS.
+2. API estável.
+3. Admin protegido.
+4. Banco MySQL com backup automatizado.
+5. Monitoramento ativo.
+6. Pix interno funcionando.
+7. Asaas configurado corretamente.
+8. Webhooks recebidos.
+9. Checklist final aprovado.
+10. Não existe dependência residual de PostgreSQL.
+
+## Entrega final esperada
+
+Ao final, entregue instruções finais de:
+
+1. Operação.
+2. Manutenção.
+3. Backup.
+4. Restore.
+5. Rollback.
+6. Monitoramento.
+7. Gestão de secrets.
+8. Renovação de certificados.
+9. Validação dos fluxos financeiros.
+10. Checklist final de produção.

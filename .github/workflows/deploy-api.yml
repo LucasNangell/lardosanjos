@@ -1,0 +1,65 @@
+name: Deploy API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Ambiente alvo
+        required: true
+        default: production
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: deploy-api-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -f apps/api/Dockerfile -t lardosanjos-api:${{ github.sha }} .
+
+      - name: Deploy via SSH (VPS)
+        if: vars.DEPLOY_SSH_HOST != ''
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -eu
+            cd ${{ secrets.DEPLOY_APP_PATH }}
+            git fetch origin main
+            git checkout main
+            git pull origin main
+            docker compose -f docker-compose.prod.yml --env-file .env.production pull || true
+            docker compose -f docker-compose.prod.yml --env-file .env.production build api
+            docker compose -f docker-compose.prod.yml --env-file .env.production up -d api redis nginx
+            docker compose -f docker-compose.prod.yml --env-file .env.production ps
+
+      - name: Healthcheck pós-deploy
+        if: vars.DEPLOY_API_URL != ''
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS "${{ vars.DEPLOY_API_URL }}/api/v1/health/ready"; then
+              echo "API pronta."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Healthcheck falhou."
+          exit 1
+
+      - name: Instruções manuais
+        if: vars.DEPLOY_SSH_HOST == ''
+        run: |
+          echo "::notice::Configure secrets DEPLOY_SSH_* e var DEPLOY_API_URL no GitHub Environment."
+          echo "Imagem local: lardosanjos-api:${{ github.sha }}"
+          echo "No servidor: docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build"

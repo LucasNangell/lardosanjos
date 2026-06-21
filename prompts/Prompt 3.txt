@@ -1,0 +1,189 @@
+Você é um engenheiro backend sênior, especialista em autenticação segura, JWT, refresh tokens, RBAC, NestJS, MySQL, Prisma, LGPD e proteção de rotas administrativas.
+
+Antes de implementar, leia integralmente o arquivo PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md e execute somente a Fase 3 — Autenticação, RBAC e Permissões Administrativas.
+
+Regras obrigatórias para esta execução
+Não implemente funcionalidades de fases futuras.
+Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+Não quebre funcionalidades já implementadas em fases anteriores.
+Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+Não trate pagamento pendente como pagamento confirmado.
+Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+Sempre atualize ou crie testes compatíveis com a fase.
+Ao final, informe:
+arquivos criados;
+arquivos alterados;
+comandos executados;
+testes realizados;
+pendências;
+como validar manualmente;
+riscos ou decisões técnicas tomadas.
+Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+Objetivo da fase
+
+Implementar autenticação segura para usuários administrativos e estrutura base de RBAC, com login no painel admin, proteção de rotas e recuperação de senha.
+
+Escopo obrigatório
+Criar módulo auth no NestJS.
+Criar módulo users.
+Implementar login por e-mail e senha.
+Implementar hash de senha com bcrypt ou argon2.
+Implementar access token JWT de curta duração.
+Implementar refresh token seguro.
+Preferir refresh token em cookie:
+HttpOnly;
+Secure em produção;
+SameSite;
+expiração configurável.
+Implementar JwtAuthGuard.
+Implementar RolesGuard ou PermissionsGuard.
+Criar decorators:
+@CurrentUser;
+@RequirePermissions;
+@Public, se necessário.
+Implementar endpoints:
+POST /api/v1/auth/login;
+POST /api/v1/auth/refresh;
+POST /api/v1/auth/logout;
+POST /api/v1/auth/forgot-password;
+POST /api/v1/auth/reset-password;
+GET /api/v1/auth/me.
+Criar tela de login em apps/admin.
+Criar proteção básica no layout administrativo.
+Registrar eventos importantes em audit_logs.
+Consultar permissões e papéis a partir do MySQL via Prisma.
+Preparar estrutura de autenticação reaproveitável para área do doador em fases futuras, sem implementar toda a área do doador agora.
+Correções obrigatórias
+Mensagens de login não devem revelar se o e-mail existe.
+Não logar senha, token, refresh token ou dados sensíveis.
+Preparar estrutura para 2FA futuro, mas não implementar 2FA nesta fase.
+A área do doador ainda não precisa ter login completo nesta fase, salvo estrutura mínima compartilhável.
+Não criar nenhum fluxo financeiro nesta fase.
+Não alterar a modelagem de dados da Fase 2 sem justificar e pedir confirmação.
+O que não implementar agora
+
+Não implementar doações, Asaas, Pix, dashboard financeiro, dashboard do doador, carteirinha, animais, campanhas, portal de transparência ou PWA.
+
+Segurança obrigatória
+Rate limit básico no login.
+Proteção contra enumeração de usuários.
+Tokens com expiração configurável por .env.
+Secrets vindos exclusivamente de .env.
+Guardas aplicados em rotas administrativas.
+CORS compatível com apps/admin e apps/web.
+Senhas nunca devem ser retornadas em DTOs.
+Hash de refresh token deve ser armazenado de forma segura, se persistido.
+Logout deve invalidar o refresh token quando aplicável.
+Reset de senha deve usar token temporário com expiração e uso único.
+Banco de dados
+
+Use as tabelas já criadas na Fase 2 no MySQL:
+
+users;
+roles;
+permissions;
+user_roles;
+role_permissions;
+audit_logs.
+
+Não criar novas tabelas sem necessidade. Se for indispensável criar tabela para refresh tokens ou password reset tokens, justifique tecnicamente e crie migration compatível com MySQL.
+
+Endpoints esperados
+POST /api/v1/auth/login
+
+Entrada:
+
+email;
+password.
+
+Saída:
+
+dados básicos do usuário;
+permissões;
+access token;
+refresh token via cookie seguro ou estratégia definida.
+POST /api/v1/auth/refresh
+
+Renova access token usando refresh token válido.
+
+POST /api/v1/auth/logout
+
+Invalida a sessão atual.
+
+GET /api/v1/auth/me
+
+Retorna usuário autenticado, papéis e permissões.
+
+POST /api/v1/auth/forgot-password
+
+Gera token de recuperação e prepara envio por e-mail.
+
+POST /api/v1/auth/reset-password
+
+Valida token de recuperação e altera senha.
+
+Frontend/Admin
+
+No apps/admin:
+
+Criar tela /login.
+Criar formulário com:
+e-mail;
+senha;
+botão entrar;
+link “esqueci minha senha”.
+Criar feedbacks:
+carregando;
+credenciais inválidas;
+erro inesperado;
+sessão expirada.
+Criar proteção básica para rotas admin.
+Redirecionar usuário não autenticado para login.
+Exibir página administrativa simples após login, sem implementar dashboard financeiro ainda.
+Integrações externas
+Configurar estrutura inicial de envio de e-mail com Resend para recuperação de senha, se o plano já prever Resend.
+Caso as chaves de e-mail não estejam configuradas, criar camada abstrata e log seguro em desenvolvimento, sem quebrar o fluxo.
+Testes obrigatórios
+Login com credenciais corretas.
+Login com senha errada.
+Login com usuário inexistente.
+Rota protegida sem token retorna 401.
+Usuário autenticado sem permissão retorna 403.
+Refresh token válido renova sessão.
+Refresh token inválido é recusado.
+Logout invalida sessão.
+Recuperação de senha gera token seguro com expiração.
+Reset de senha altera senha e invalida token.
+Senha não aparece em nenhuma resposta.
+Permissões são carregadas corretamente do MySQL.
+Eventos sensíveis são gravados em audit_logs.
+Build, lint e typecheck continuam passando.
+Critérios de aceite
+
+A fase só estará concluída se:
+
+Admin consegue logar em apps/admin.
+Admin consegue acessar uma rota protegida.
+Usuário sem permissão é bloqueado.
+Tokens não aparecem em logs.
+Senhas não aparecem em respostas.
+Reset de senha funciona ou fica preparado de forma segura se depender de e-mail.
+RBAC funciona com dados do MySQL.
+Build e testes passam.
+Nenhum fluxo financeiro foi implementado indevidamente.
+Entrega final esperada
+
+Ao final da execução, entregue um relatório objetivo contendo:
+
+Arquivos criados.
+Arquivos alterados.
+Comandos executados.
+Testes realizados.
+Resultado dos testes.
+Como criar ou validar um admin via seed.
+Como testar login manualmente.
+Como testar uma rota protegida.
+Como validar permissões.
+Pendências ou riscos identificados.

@@ -1,0 +1,120 @@
+Você é um backend engineer sênior, especialista em webhooks financeiros, filas, BullMQ, Redis, idempotência, MySQL, consistência transacional e conciliação de pagamentos.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 10 — Webhooks Asaas e Idempotência**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Implementar recebimento, armazenamento, processamento assíncrono, idempotência, atualização de status financeiro e reprocessamento administrativo de webhooks do Asaas.
+
+## Escopo obrigatório
+
+1. Criar endpoint:
+
+   * `POST /api/v1/integration/asaas/webhook`.
+2. Validar token/assinatura/header configurado por `.env`, se disponível.
+3. Salvar payload bruto em `asaas_webhook_events` no MySQL.
+4. Garantir idempotência por `event_id` ou hash estável.
+5. Criar fila BullMQ para processamento.
+6. Processar eventos de:
+
+   * pagamento criado;
+   * pagamento confirmado;
+   * pagamento recebido;
+   * pagamento vencido;
+   * pagamento cancelado;
+   * pagamento estornado;
+   * pagamento falhou;
+   * assinatura criada;
+   * assinatura atualizada;
+   * assinatura cancelada.
+7. Atualizar:
+
+   * `payments`;
+   * `subscriptions`;
+   * `donors`, se necessário.
+8. Criar logs de erro.
+9. Criar rotas administrativas mínimas:
+
+   * `GET /api/v1/admin/webhooks/asaas`;
+   * `GET /api/v1/admin/webhooks/asaas/:id`;
+   * `POST /api/v1/admin/webhooks/asaas/:id/reprocess`.
+10. Criar tela administrativa simples para visualizar webhooks e reprocessar erros, se `apps/admin` já permitir.
+
+## Correção obrigatória
+
+O plano geral prevê logs e reprocessamento de webhooks. Portanto, nesta fase, implemente pelo menos a base administrativa para listagem e reprocessamento, ainda que visualmente simples.
+
+## O que não implementar agora
+
+Não implementar Pix manual, confirmação de Pix, transparência pública completa, dashboard financeiro completo ou conciliação avançada.
+
+## Segurança obrigatória
+
+1. Endpoint de webhook não pode aceitar payload sem validação mínima.
+2. Responder rapidamente para evitar timeout.
+3. Processar pesado em fila.
+4. Não processar evento duplicado duas vezes.
+5. Não logar dados sensíveis desnecessários.
+6. Rota de reprocessamento apenas para admin autorizado.
+7. Não bloquear webhook legítimo do Asaas indevidamente por rate limit.
+8. Não misturar eventos Asaas com Pix manual.
+
+## Testes obrigatórios
+
+1. Webhook válido é salvo.
+2. Webhook duplicado não duplica efeitos.
+3. Webhook fora de ordem não corrompe status.
+4. Webhook com pagamento confirmado atualiza `payments`.
+5. Webhook com assinatura cancelada atualiza `subscriptions`.
+6. Webhook inválido é rejeitado.
+7. Reprocessamento manual funciona.
+8. Pix avulso não depende desses webhooks.
+9. Gravação de payload `Json` funciona no MySQL.
+10. Falhas ficam registradas para análise.
+
+## Critérios de aceite
+
+1. Eventos Asaas são salvos e processados.
+2. Idempotência funciona.
+3. Falhas podem ser reprocessadas.
+4. Status financeiro local é atualizado corretamente.
+5. Build e testes passam.
+6. Nenhuma doação Pix manual é processada por webhook Asaas.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como simular webhooks localmente.
+4. Como reprocessar eventos com erro.
+5. Como conferir registros no MySQL.
+6. Testes executados.
+7. Pendências e riscos.
+
+---
+

@@ -1,0 +1,120 @@
+Você é um backend engineer sênior, especialista em Pix, BR Code/EMV, CRC16, geração de QR Code, segurança financeira, NestJS, Prisma e MySQL.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 6 — Geração de Pix Avulso Manual (BR Code/EMV Próprio)**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Implementar o fluxo backend de geração de Pix avulso próprio, sem Asaas, criando payload BR Code/EMV, Pix Copia e Cola e QR Code para doações únicas.
+
+## Escopo obrigatório
+
+1. Criar módulo `pix-manual` ou `donations/pix-manual`.
+2. Criar serviço gerador de payload BR Code/EMV.
+3. Implementar cálculo correto de CRC16.
+4. Gerar QR Code em Base64 ou formato seguro definido no plano.
+5. Ler configurações da tabela `pix_settings` no MySQL.
+6. Criar rotas:
+
+   * `GET /api/v1/public/pix/settings`;
+   * `POST /api/v1/public/donations/pix`;
+   * `GET /api/v1/public/donations/pix/:id/status`.
+7. Validar:
+
+   * valor mínimo;
+   * valores rápidos permitidos, se aplicável;
+   * chave Pix configurada;
+   * tipo da chave;
+   * nome do recebedor;
+   * cidade do recebedor;
+   * tamanho dos campos EMV;
+   * caracteres inválidos.
+8. Criar `txid` único.
+9. Persistir registro em `pix_donations` com status `PIX_GERADO`.
+10. Aplicar rate limit para evitar spam.
+11. Retornar:
+
+* ID da doação;
+* payload Pix Copia e Cola;
+* QR Code;
+* valor;
+* status;
+* instruções públicas;
+* beneficiário, respeitando configuração de privacidade.
+
+## Correções obrigatórias
+
+1. Não chamar Asaas em nenhum ponto deste fluxo.
+2. Não considerar QR Code gerado como pagamento confirmado.
+3. Não contabilizar `PIX_GERADO` no portal de transparência.
+4. Não exibir chave Pix completa se `hide_sensitive_details` estiver ativo, exceto onde tecnicamente necessário no payload.
+5. Usar MySQL via Prisma, sem sintaxe PostgreSQL.
+
+## O que não implementar agora
+
+Não implementar tela pública, upload de comprovante, confirmação manual administrativa, transparência ou mural.
+
+## Segurança obrigatória
+
+1. Rate limit.
+2. Validação forte de valor.
+3. Não expor dados além do necessário.
+4. Logs sem dados sensíveis excessivos.
+5. Não permitir criação de Pix se `pix_settings.is_active=false`.
+6. Proteger contra geração massiva de intenções falsas.
+
+## Testes obrigatórios
+
+1. Gerar BR Code válido.
+2. Validar CRC16.
+3. Gerar QR Code legível.
+4. Tentar gerar Pix abaixo do mínimo.
+5. Tentar gerar Pix sem configuração ativa.
+6. Tentar gerar Pix com chave inválida.
+7. Garantir que Asaas não é chamado.
+8. Garantir que status inicial é `PIX_GERADO`.
+9. Validar gravação no MySQL.
+10. Validar unicidade de `txid`.
+
+## Critérios de aceite
+
+1. Endpoint gera Pix Copia e Cola válido.
+2. QR Code pode ser lido por app bancário em ambiente real/teste.
+3. Registro é salvo em `pix_donations`.
+4. Status não é confirmado automaticamente.
+5. Build e testes passam.
+6. Não há nenhuma dependência do Asaas no fluxo Pix avulso.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar manualmente o QR Code.
+4. Como validar o payload BR Code.
+5. Como conferir o registro no MySQL.
+6. Testes executados.
+7. Pendências e riscos.

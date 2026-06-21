@@ -1,0 +1,6 @@
+# Placeholder — gere certificados com certbot e copie para este diretório:
+#   fullchain.pem
+#   privkey.pem
+#
+# Exemplo (host com docker):
+#   certbot certonly --webroot -w ./deploy/nginx/certbot -d api.lardosanjos.online

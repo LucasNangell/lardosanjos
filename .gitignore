@@ -1,0 +1,57 @@
+# Dependências
+node_modules/
+/node_modules
+**/node_modules/
+
+# Build
+.next/
+**/.next/cache
+dist/
+build/
+out/
+.turbo/
+
+# Ambiente — nunca versionar secrets reais
+.env
+.env.*
+!.env.example
+!.env*.example
+deploy/hostinger-env-*.example
+
+# Logs e temporários
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+tmp/
+temp/
+.cache/
+uploads/
+storage/
+
+# Testes e cobertura
+coverage/
+
+# Banco / backups locais
+mysql_data/
+redis_data/
+backups/
+*.sql.gz
+*.sql
+!deploy/schema.sql
+!public_html/schema.sql
+!deploy/sql/*.sql
+
+# Prisma gerado local (regenerado no build)
+.prisma/
+
+# IDE / OS
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

@@ -1,0 +1,115 @@
+Você é um full-stack engineer sênior, especialista em assinaturas recorrentes, cancelamento ético, Asaas, segurança, MySQL e UX sem dark patterns.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 12 — Gestão de Assinaturas, Upgrade e Cancelamento**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Permitir ao doador gerenciar sua assinatura mensal: consultar plano, alterar plano, atualizar pagamento, pausar quando aplicável e cancelar sem fricção abusiva.
+
+## Escopo obrigatório
+
+1. Criar páginas:
+
+   * `/dashboard/assinatura`;
+   * `/dashboard/assinatura/alterar-plano`;
+   * `/dashboard/assinatura/pagamento`;
+   * `/dashboard/assinatura/cancelar`.
+2. Criar endpoints:
+
+   * `GET /api/v1/donor/subscription`;
+   * `POST /api/v1/donor/subscription/change-plan`;
+   * `POST /api/v1/donor/subscription/update-payment`;
+   * `POST /api/v1/donor/subscription/pause`, se suportado;
+   * `POST /api/v1/donor/subscription/cancel`.
+3. Integrar alteração/cancelamento com Asaas.
+4. Atualizar banco local MySQL.
+5. Criar fluxo de confirmação simples.
+6. Criar pesquisa opcional de motivo de cancelamento.
+7. Não bloquear cancelamento.
+8. Exibir consequências:
+
+   * cobranças futuras;
+   * status da carteirinha futura;
+   * perda de plano ativo.
+
+## Correções obrigatórias
+
+1. Cancelamento deve ocorrer em até 3 cliques.
+2. Não exigir contato com administração.
+3. Não criar dark patterns.
+4. Não cancelar somente localmente: deve cancelar também no Asaas.
+5. Se Asaas falhar, informar claramente e não fingir cancelamento concluído.
+6. Atualização de pagamento não deve armazenar cartão localmente.
+7. Não mexer no fluxo de Pix avulso manual.
+8. Não tratar cancelamento pendente no Asaas como concluído localmente sem confirmação ou retorno seguro.
+
+## O que não implementar agora
+
+Não implementar admin financeiro completo, carteirinha, mural, transparência ou campanhas.
+
+## Segurança obrigatória
+
+1. Reautenticar ou confirmar ação sensível.
+2. Registrar em `audit_logs`.
+3. Validar que a assinatura pertence ao doador logado.
+4. Não expor IDs internos de outros doadores.
+5. Não logar dados de cartão.
+6. Evitar IDOR em rotas de assinatura.
+
+## Testes obrigatórios
+
+1. Consultar assinatura ativa.
+2. Trocar plano.
+3. Cancelar assinatura.
+4. Simular falha Asaas no cancelamento.
+5. Garantir que outro doador não altera assinatura alheia.
+6. Garantir que cancelamento atualiza status local.
+7. Verificar UX mobile.
+8. Confirmar gravação de auditoria.
+9. Confirmar persistência correta no MySQL.
+
+## Critérios de aceite
+
+1. Doador consegue cancelar sem impedimento abusivo.
+2. Asaas e banco local ficam sincronizados.
+3. Falhas são tratadas claramente.
+4. Build e testes passam.
+5. A experiência respeita engajamento ético e não usa dark patterns.
+
+## Entrega final esperada
+
+Ao final, explique:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como validar upgrade.
+4. Como validar downgrade.
+5. Como validar cancelamento em sandbox.
+6. Como conferir status no MySQL.
+7. Testes executados.
+8. Pendências e riscos.
+
+---

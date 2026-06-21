@@ -1,0 +1,134 @@
+Você é um frontend engineer sênior, especialista em Next.js, SEO, performance, PWA, acessibilidade, conteúdo institucional e Lighthouse.
+
+Antes de implementar, leia integralmente o arquivo `PLANO_IMPLEMENTACAO_LAR_DOS_ANJOS.md` e execute somente a **Fase 20 — SEO, FAQs, Institucionais e Setup PWA**.
+
+## Regras obrigatórias para esta execução
+
+1. Não implemente funcionalidades de fases futuras.
+2. Não altere decisões arquiteturais já definidas no plano sem justificar e pedir confirmação.
+3. Não quebre funcionalidades já implementadas em fases anteriores.
+4. Preserve a regra crítica: doação única via Pix deve ser interna, gerando BR Code/EMV pelo próprio sistema, sem usar Asaas.
+5. Use Asaas apenas para assinaturas recorrentes, cartão de crédito, boleto e Pix recorrente/automático quando aplicável.
+6. Nunca exponha chaves do Asaas, secrets, tokens ou dados sensíveis no frontend.
+7. Não trate pagamento pendente como pagamento confirmado.
+8. Pix avulso só pode entrar na transparência após confirmação manual administrativa.
+9. Sempre atualize ou crie testes compatíveis com a fase.
+10. Ao final, informe:
+
+* arquivos criados;
+* arquivos alterados;
+* comandos executados;
+* testes realizados;
+* pendências;
+* como validar manualmente;
+* riscos ou decisões técnicas tomadas.
+
+11. Se houver ambiguidade crítica, pare e pergunte antes de implementar.
+
+## Objetivo da fase
+
+Finalizar a camada pública institucional, SEO, FAQ, termos, privacidade e transformar o portal em PWA instalável.
+
+## Escopo obrigatório
+
+1. Criar/ajustar páginas:
+
+   * `/`;
+   * `/sobre`;
+   * `/voluntariado`;
+   * `/faq`;
+   * `/contato`;
+   * `/politica-de-privacidade`;
+   * `/termos-de-uso`;
+   * páginas de erro;
+   * página 404;
+   * página de sucesso;
+   * página de pagamento pendente;
+   * página de falha de pagamento.
+2. Criar ou finalizar Home com:
+
+   * hero;
+   * planos;
+   * doação única;
+   * transparência resumida;
+   * animais/histórias;
+   * mural resumido;
+   * CTA.
+3. Criar SEO:
+
+   * title;
+   * meta description;
+   * OpenGraph;
+   * Twitter cards;
+   * canonical;
+   * sitemap;
+   * robots.txt;
+   * JSON-LD Schema.org.
+4. Criar PWA:
+
+   * `manifest.json`;
+   * ícones;
+   * theme color;
+   * splash;
+   * service worker;
+   * cache de assets críticos;
+   * comportamento standalone.
+5. Criar FAQ gerenciável ou estático, conforme estado do CMS.
+6. Otimizar imagens.
+7. Melhorar performance.
+
+## Correção obrigatória
+
+O plano original citava SEO, FAQ e PWA. Inclua também obrigatoriamente páginas institucionais: Sobre, Contato, Voluntariado, Termos de Uso e Política de Privacidade.
+
+## O que não implementar agora
+
+Não implementar notificações push avançadas, app nativo, novas integrações financeiras ou funcionalidades administrativas complexas.
+
+## Segurança e LGPD
+
+1. Política de Privacidade deve mencionar tratamento de dados de doadores.
+2. Termos devem explicar doações, recorrência, cancelamento e Pix pendente.
+3. PWA não deve cachear dados sensíveis de área logada.
+4. Service worker deve evitar cache indevido de dashboards privados.
+5. Não expor informações financeiras internas.
+6. Não cachear respostas autenticadas.
+
+## Testes obrigatórios
+
+1. Lighthouse:
+
+   * Performance;
+   * SEO;
+   * Acessibilidade;
+   * PWA.
+2. Testar instalação no celular.
+3. Testar páginas institucionais.
+4. Testar metadados de compartilhamento.
+5. Testar que área logada não é cacheada indevidamente.
+6. Testar 404 e páginas de erro.
+7. Validar sitemap e robots.
+8. Validar responsividade mobile.
+
+## Critérios de aceite
+
+1. Site instalável como PWA.
+2. SEO básico completo.
+3. Páginas institucionais prontas.
+4. Lighthouse acima de 90 onde possível.
+5. Build e testes passam.
+6. Cache não compromete privacidade.
+
+## Entrega final esperada
+
+Ao final, informe:
+
+1. Arquivos criados.
+2. Arquivos alterados.
+3. Como instalar o PWA no celular.
+4. Como validar SEO.
+5. Como validar Lighthouse.
+6. Testes executados.
+7. Pendências e riscos.
+
+---
