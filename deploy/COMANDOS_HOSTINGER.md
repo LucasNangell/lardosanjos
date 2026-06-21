@@ -1,145 +1,98 @@
 # Comandos Hostinger — Lar dos Anjos Pet
 
-Referência rápida de build/start para **Node.js Web Apps** no hPanel (monorepo na **raiz** do repositório).
+Guia atualizado após auditoria de deploy (Corepack/pnpm na Hostinger).
 
-> Hostinger Business **não é VPS**: sem Docker, sem root, sem Nginx manual. Use os comandos abaixo no hPanel.
-
----
-
-## Pré-requisitos no hPanel
-
-- Node.js **20.x**
-- Package manager: **pnpm** (via `corepack enable` nos scripts `hostinger:build:*`)
-- Application root: **`/`** (raiz do repositório clonado)
+**Configuração campo a campo:** [HOSTINGER_HPANEL_EXATO.md](./HOSTINGER_HPANEL_EXATO.md)
 
 ---
 
-### IMPORTANTE — Gerenciador de pacotes no hPanel
+## Regras críticas
 
-Use **npm** (não **pnpm**) no campo **Gerenciador de pacotes**.
-
-O pnpm via Corepack da Hostinger falha com:
-`ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING`
-
-O comando de construção usa `npx pnpm@9` internamente para instalar dependências do monorepo.
+1. **Gerenciador de pacotes no hPanel = npm** (nunca pnpm — Corepack quebra)
+2. **Comando de construção = `node scripts/hostinger-build.mjs web`** (ou `admin` / `api`)
+3. **Não use** `pnpm run ...` no comando de construção do hPanel
+4. Variável **`HOSTINGER_APP=web`** (ou admin/api) no hPanel + script `start` na raiz
 
 ---
 
-## API NestJS
+## Web (`lardosanjos.online`)
 
-| Campo | Valor |
-|-------|--------|
-| Domínio sugerido | `api.lardosanjos.online` |
-| Build command | `pnpm run hostinger:build:api` |
-| Start command | `pnpm run start:api` |
-| Output / entry | `apps/api/dist/main.js` |
-
-### Comandos equivalentes (manual / SSH se disponível)
-
-```bash
-corepack enable
-pnpm install --frozen-lockfile
-pnpm run build:api
-pnpm run start:api
-```
-
-### Pós-deploy (seed — apenas 1ª vez)
-
-```bash
-pnpm run db:seed
-```
-
-Requer variáveis `SEED_ADMIN_*` no hPanel. Remova a senha do painel após o seed.
-
----
-
-## Web Next.js (público)
-
-| Campo | Valor |
-|-------|--------|
-| Domínio sugerido | `lardosanjos.online` |
-| Build command | `npm run hostinger:build:web` |
-| Gerenciador de pacotes | **npm** (obrigatório — não use pnpm no hPanel) |
+| Campo hPanel | Valor |
+|--------------|--------|
+| Predefinida | Next.js |
+| Comando de construção | `node scripts/hostinger-build.mjs web` |
+| Gerenciador de pacotes | **npm** |
 | Diretório de saída | `apps/web/.next` |
-| Start command | `pnpm run start:web` |
+| Node | 20.x |
+| Raiz | `./` |
 
-**Antes do build**, configure no hPanel (ver `deploy/hostinger-env-web.example`):
-
-- `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_SITE_NAME`
+**Env (antes do build):**
+```env
+HOSTINGER_APP=web
+NEXT_PUBLIC_API_URL=https://api.lardosanjos.online/api/v1
+NEXT_PUBLIC_APP_URL=https://lardosanjos.online
+NEXT_PUBLIC_SITE_NAME=Lar dos Anjos Pet
+```
 
 ---
 
-## Admin Next.js
+## Admin (`admin.lardosanjos.online`)
 
 | Campo | Valor |
 |-------|--------|
-| Domínio sugerido | `admin.lardosanjos.online` |
-| Build command | `pnpm run hostinger:build:admin` |
-| Start command | `pnpm run start:admin` |
-
-**Antes do build**, configure (ver `deploy/hostinger-env-admin.example`):
-
-- `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_ADMIN_URL`
+| Comando de construção | `node scripts/hostinger-build.mjs admin` |
+| Diretório de saída | `apps/admin/.next` |
+| HOSTINGER_APP | `admin` |
 
 ---
 
-## Banco de dados
+## API (`api.lardosanjos.online`)
 
-### Opção A — Importar SQL (recomendada no Hostinger)
+| Campo | Valor |
+|-------|--------|
+| Predefinida | **Outra** |
+| Comando de construção | `node scripts/hostinger-build.mjs api` |
+| Diretório de saída | `apps/api/dist` |
+| Entrada (se pedir) | `apps/api/dist/main.js` |
+| HOSTINGER_APP | `api` |
 
-1. Criar banco MySQL no hPanel.
-2. phpMyAdmin → Importar → `deploy/schema.sql` (ou `public_html/schema.sql`).
-3. Montar `DATABASE_URL` na API.
+---
 
-### Opção B — Prisma migrate deploy
+## O que o script de build faz
 
-Somente em **banco vazio**, **sem** importar `schema.sql`:
+1. `npx pnpm@9 install --frozen-lockfile --prod=false` (instala devDeps para compilar)
+2. Build packages workspace (types, validators, ui, database)
+3. Build do app (web/admin/api)
 
-```bash
-pnpm run db:migrate:deploy
-pnpm run db:seed
+Tudo via `npx` — sem depender de `pnpm` no PATH.
+
+---
+
+## Start em runtime
+
+Raiz do `package.json`:
+```json
+"start": "node scripts/hostinger-start.mjs"
 ```
 
----
-
-## Healthcheck
-
-```bash
-curl https://api.lardosanjos.online/api/v1/health
-curl https://api.lardosanjos.online/api/v1/health/ready
-```
+Defina `HOSTINGER_APP` no hPanel para cada app.
 
 ---
 
-## Redis externo (obrigatório)
+## Alternativa (npm script)
 
-A API usa BullMQ para webhooks Asaas. Configure `REDIS_URL` com serviço externo (Upstash, Redis Cloud, etc.).
+Comando de construção: `npm run hostinger:build:web`
 
-Sem Redis: webhooks são **persistidos** mas o **processamento assíncrono fica desabilitado** (ver logs da API).
-
----
-
-## Redeploy após push no GitHub
-
-1. Push na branch `main`.
-2. hPanel → Node.js Web App → **Redeploy** / aguarde deploy automático.
-3. Se alterou `NEXT_PUBLIC_*`: **rebuild obrigatório** do web/admin.
+Equivalente a `node scripts/hostinger-build.mjs web`.
 
 ---
 
-## Scripts úteis na raiz
+## Banco
 
-| Script | Descrição |
-|--------|-----------|
-| `pnpm run hostinger:build:api` | Install + build API + deps |
-| `pnpm run hostinger:build:web` | Install + build web |
-| `pnpm run hostinger:build:admin` | Install + build admin |
-| `pnpm run start:api` | Inicia API produção |
-| `pnpm run start:web` | Inicia Next web |
-| `pnpm run start:admin` | Inicia Next admin |
-| `pnpm run db:migrate:deploy` | Migrations Prisma |
-| `pnpm run db:seed` | Seed roles + admin |
-| `pnpm run check:secrets` | Valida ausência de secrets no Git |
+Importar `deploy/schema.sql` no phpMyAdmin antes da API.
+
+---
+
+## Redis
+
+Obrigatório na API (externo — Upstash etc.).

@@ -26,12 +26,14 @@
     "start:web": "pnpm --filter web start",
     "build:admin": "pnpm build:deps && pnpm --filter admin build",
     "start:admin": "pnpm --filter admin start",
-    "hostinger:build:api": "npx pnpm@9 install --frozen-lockfile && pnpm run build:api",
-    "hostinger:build:web": "npx pnpm@9 install --frozen-lockfile && pnpm run build:web",
-    "hostinger:build:admin": "npx pnpm@9 install --frozen-lockfile && pnpm run build:admin",
-    "hostinger:start:web": "pnpm --filter web start",
-    "hostinger:start:admin": "pnpm --filter admin start",
-    "hostinger:start:api": "node apps/api/dist/main.js"
+    "hostinger:build": "node scripts/hostinger-build.mjs",
+    "hostinger:build:api": "node scripts/hostinger-build.mjs api",
+    "hostinger:build:web": "node scripts/hostinger-build.mjs web",
+    "hostinger:build:admin": "node scripts/hostinger-build.mjs admin",
+    "start": "node scripts/hostinger-start.mjs",
+    "hostinger:start:web": "HOSTINGER_APP=web node scripts/hostinger-start.mjs",
+    "hostinger:start:admin": "HOSTINGER_APP=admin node scripts/hostinger-start.mjs",
+    "hostinger:start:api": "HOSTINGER_APP=api node scripts/hostinger-start.mjs"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
