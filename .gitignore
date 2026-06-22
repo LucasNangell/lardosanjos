@@ -11,7 +11,17 @@ build/
 out/
 .turbo/
 
-# public_html — artefatos de upload (gerados localmente)
+# public_html — artefatos gerados (upload manual)
+public_html/apps/
+public_html/node_modules/
+public_html/dist/
+public_html/start.sh
+public_html/start.mjs
+public_html/LEIA-ME.txt
+public_html/.env.example
+public_html/package.json
+public_html/admin/
+public_html/api/
 public_html/lardosanjos.online/
 public_html/admin.lardosanjos.online/
 public_html/api.lardosanjos.online/

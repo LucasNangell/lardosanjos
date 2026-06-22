@@ -8,6 +8,7 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -18,21 +19,32 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outRoot = join(root, 'public_html');
 
+/** Pastas/arquivos que ficam em public_html/ e não são apagados no rebuild do site raiz */
+const WEB_ROOT_PRESERVE = new Set([
+  'README_UPLOAD_HOSTINGER.md',
+  'schema.sql',
+  'admin',
+  'api',
+]);
+
 const SITES = {
   web: {
-    dir: join(outRoot, 'lardosanjos.online'),
+    dir: outRoot,
     app: 'web',
     server: 'apps/web/server.js',
     envExample: 'deploy/hostinger-env-web.example',
+    preserve: WEB_ROOT_PRESERVE,
+    uploadHint: 'Envie o conteúdo diretamente para public_html/ de lardosanjos.online (sem subpasta).',
   },
   admin: {
-    dir: join(outRoot, 'admin.lardosanjos.online'),
+    dir: join(outRoot, 'admin'),
     app: 'admin',
     server: 'apps/admin/server.js',
     envExample: 'deploy/hostinger-env-admin.example',
+    uploadHint: 'Envie o conteúdo de public_html/admin/ para public_html de admin.lardosanjos.online.',
   },
   api: {
-    dir: join(outRoot, 'api.lardosanjos.online'),
+    dir: join(outRoot, 'api'),
     envExample: 'deploy/hostinger-env-api.example',
   },
 };
@@ -113,7 +125,23 @@ function copyEnvExample(targetDir, relExample) {
   }
 }
 
-function packNextStandalone({ dir, app, server, envExample }) {
+function cleanDeployDir(dir, preserve = null) {
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+    return;
+  }
+  if (!preserve) {
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
+    return;
+  }
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (preserve.has(entry.name)) continue;
+    rmSync(join(dir, entry.name), { recursive: true, force: true });
+  }
+}
+
+function packNextStandalone({ dir, app, server, envExample, preserve, uploadHint }) {
   const appDir = join(root, 'apps', app);
   const standalone = join(appDir, '.next', 'standalone');
 
@@ -121,8 +149,7 @@ function packNextStandalone({ dir, app, server, envExample }) {
     throw new Error(`Standalone não encontrado em apps/${app}/.next/standalone — rode next build`);
   }
 
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
+  cleanDeployDir(dir, preserve ?? null);
 
   cpSync(standalone, dir, { recursive: true });
   cpSync(
@@ -142,9 +169,9 @@ function packNextStandalone({ dir, app, server, envExample }) {
   writeFileSync(
     join(dir, 'LEIA-ME.txt'),
     [
-      'Lar dos Anjos Pet — site Next.js (upload manual)',
+      `Lar dos Anjos Pet — ${app === 'web' ? 'site principal' : 'admin'} (upload manual)`,
       '',
-      '1. Envie TODO o conteú desta pasta para public_html do domínio correspondente.',
+      `1. ${uploadHint}`,
       '2. Renomeie .env.example para .env e preencha as variáveis.',
       '3. Via SSH: chmod +x start.sh && ./start.sh',
       '   Ou: node start.mjs',
@@ -155,8 +182,7 @@ function packNextStandalone({ dir, app, server, envExample }) {
 }
 
 function packApi({ dir, envExample }) {
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
+  cleanDeployDir(dir);
 
   run(`npx --yes pnpm@9 deploy --filter api --prod "${dir}"`, { build: true });
 
@@ -203,9 +229,9 @@ child.on('exit', (code) => process.exit(code ?? 1));
     [
       'Lar dos Anjos Pet — API NestJS (upload manual)',
       '',
-      '1. Envie TODO o conteú desta pasta para public_html de api.lardosanjos.online',
+      '1. Envie o conteúdo de public_html/api/ para public_html de api.lardosanjos.online',
       '2. Renomeie .env.example para .env (DATABASE_URL, REDIS_URL, JWT, etc.)',
-      '3. Importe ../schema.sql no MySQL antes de iniciar.',
+      '3. Importe schema.sql no MySQL antes de iniciar (cópia incluída nesta pasta).',
       '4. Via SSH: chmod +x start.sh && ./start.sh',
       '',
       'Health: https://api.lardosanjos.online/api/v1/health/ready',
@@ -243,24 +269,33 @@ function main() {
 
   mkdirSync(outRoot, { recursive: true });
 
-  log('Empacotando lardosanjos.online...');
+  for (const legacy of [
+    'lardosanjos.online',
+    'admin.lardosanjos.online',
+    'api.lardosanjos.online',
+  ]) {
+    rmSync(join(outRoot, legacy), { recursive: true, force: true });
+  }
+
+  log('Empacotando site raiz (public_html/)...');
   packNextStandalone(SITES.web);
 
-  log('Empacotando admin.lardosanjos.online...');
+  log('Empacotando admin (public_html/admin/)...');
   packNextStandalone(SITES.admin);
 
-  log('Empacotando api.lardosanjos.online...');
+  log('Empacotando api (public_html/api/)...');
   packApi(SITES.api);
 
   const schemaSrc = join(root, 'deploy', 'schema.sql');
   if (existsSync(schemaSrc)) {
     cpSync(schemaSrc, join(outRoot, 'schema.sql'));
+    cpSync(schemaSrc, join(outRoot, 'api', 'schema.sql'));
   }
 
-  log('Concluído! Envie as pastas em public_html/ para a Hostinger.');
-  log('  public_html/lardosanjos.online          → public_html do site principal');
-  log('  public_html/admin.lardosanjos.online   → public_html do subdomínio admin');
-  log('  public_html/api.lardosanjos.online     → public_html do subdomínio api');
+  log('Concluído!');
+  log('  public_html/          → arquivos na raiz de lardosanjos.online/public_html/');
+  log('  public_html/admin/    → raiz de admin.lardosanjos.online/public_html/');
+  log('  public_html/api/      → raiz de api.lardosanjos.online/public_html/');
 }
 
 main();

@@ -13,10 +13,16 @@ Isso cria:
 
 | Pasta local | Destino na Hostinger |
 |-------------|----------------------|
-| `public_html/lardosanjos.online/` | `/domains/lardosanjos.online/public_html/` |
-| `public_html/admin.lardosanjos.online/` | `/domains/admin.lardosanjos.online/public_html/` |
-| `public_html/api.lardosanjos.online/` | `/domains/api.lardosanjos.online/public_html/` |
+| **`public_html/`** (conteúdo na raiz — `apps/`, `start.sh`, etc.) | `/domains/lardosanjos.online/public_html/` **direto, sem subpasta** |
+| `public_html/admin/` | `/domains/admin.lardosanjos.online/public_html/` |
+| `public_html/api/` | `/domains/api.lardosanjos.online/public_html/` |
 | `public_html/schema.sql` | Importar no phpMyAdmin |
+
+### Site principal (lardosanjos.online)
+
+Envie **o conteúdo interno** de `public_html/` — ou seja, `apps/`, `node_modules/`, `start.sh`, `.env.example`, etc. — **diretamente** na raiz do `public_html` do domínio. **Não** crie uma subpasta `lardosanjos.online/` dentro do `public_html` na Hostinger.
+
+Mantenha na raiz local apenas o que vai para o site: `README_UPLOAD_HOSTINGER.md` e `schema.sql` ficam como referência; `admin/` e `api/` são pacotes separados para os subdomínios.
 
 **Apague** o conteúdo antigo de cada `public_html` na Hostinger (incluindo `.builds/` do deploy Git) antes de enviar.
 
@@ -27,7 +33,7 @@ Isso cria:
 
 ## 3. Variáveis de ambiente
 
-Em **cada** pasta enviada, renomeie `.env.example` → `.env` e preencha (ou crie `.env` no Gerenciador de Arquivos).
+Em **cada** destino (site raiz, admin, api), renomeie `.env.example` → `.env` e preencha.
 
 Use seu `.env` local na raiz do projeto como referência.
 
@@ -35,15 +41,19 @@ Use seu `.env` local na raiz do projeto como referência.
 
 Os sites Next.js e a API **precisam de Node em execução** (não são HTML estático).
 
-Conecte via SSH e, em cada domínio:
-
 ```bash
-cd ~/domains/api.lardosanjos.online/public_html
-chmod +x start.sh
-./start.sh
-```
+# Site principal
+cd ~/domains/lardosanjos.online/public_html
+chmod +x start.sh && ./start.sh
 
-Repita para `lardosanjos.online` e `admin.lardosanjos.online`.
+# Admin
+cd ~/domains/admin.lardosanjos.online/public_html
+chmod +x start.sh && ./start.sh
+
+# API
+cd ~/domains/api.lardosanjos.online/public_html
+chmod +x start.sh && ./start.sh
+```
 
 Para manter rodando em background, use `screen`, `tmux` ou PM2 se disponível:
 
